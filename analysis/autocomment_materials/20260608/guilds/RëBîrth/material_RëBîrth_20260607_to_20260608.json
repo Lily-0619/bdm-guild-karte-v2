@@ -1,0 +1,79 @@
+{
+  "material_type": "guild_autocomment_material",
+  "guild_name": "RëBîrth",
+  "old_date": "2026-06-07",
+  "new_date": "2026-06-08",
+  "old_display_date": "2026-06-07",
+  "new_display_date": "2026-06-08",
+  "old_compact_date": "20260607",
+  "new_compact_date": "20260608",
+  "period": {
+    "old_date": "2026-06-07",
+    "new_date": "2026-06-08"
+  },
+  "key_metrics": {
+    "member_count": null,
+    "avg_cpm": null,
+    "total_cpm": null,
+    "rank": null
+  },
+  "deltas": {},
+  "member_changes": {
+    "exact_match_count": null,
+    "exact_matches_sample": [],
+    "new_joiners": [],
+    "unknown_members": [],
+    "renamed_members": [],
+    "transferred_members": []
+  },
+  "growth_top": [],
+  "stagnant_or_decline": [],
+  "summary_records": [],
+  "sqlite_rows": [
+    {
+      "name": "guild_snapshots",
+      "columns": [
+        "id",
+        "retrieved_at",
+        "guild_name",
+        "member_count",
+        "avg_cpm",
+        "total_cpm",
+        "created_at"
+      ],
+      "rows": [
+        {
+          "id": 27,
+          "retrieved_at": "2026-05-29 11:09",
+          "guild_name": "RëBîrth",
+          "member_count": 48,
+          "avg_cpm": 94744,
+          "total_cpm": 4547699,
+          "created_at": "2026-06-04 11:39:27"
+        }
+      ]
+    }
+  ],
+  "pv_trends": {
+    "record_count": 0,
+    "latest_rows": [],
+    "growth_top": [],
+    "stagnant_or_decline": []
+  },
+  "personal_pv_records": [],
+  "unknown_pv_records": [],
+  "summary_rows": [],
+  "personal_pv_rows": [],
+  "unknown_pv_rows": [],
+  "guild_files": [],
+  "guild_warnings": [
+    "summary由来のギルド集計情報が不足しています。",
+    "PVカルテ由来の個人推移情報が不足しています。"
+  ],
+  "ai_instruction": [
+    "このギルド専用材料だけを使って自然な日本語コメントを作成する。",
+    "不足データは断定せず情報不足として扱う。",
+    "良い点、注意点、次に見るべき点を含める。",
+    "指定JSON形式のみで返す。"
+  ]
+}

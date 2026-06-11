@@ -1,0 +1,831 @@
+# ギルド別AutoComment AI作文材料
+ギルド名: Astrklotho
+対象期間: 2026-06-07 → 2026-06-08
+
+## 材料不足・注意
+- summary由来のギルド集計情報が不足しています。
+- PVカルテ由来の個人推移情報が不足しています。
+
+## 主要指標
+- 人数: None
+- 平均CPM: None
+- 総CPM: None
+- 順位: None
+
+## 前回との差分
+- 差分を計算できる前回データが不足しています。
+
+## メンバー変化
+- 完全一致人数: None
+- 新規加入者: []
+- 追跡不明者: []
+- 名前変更者: []
+- 移籍者: []
+
+## CPM伸び上位
+- 該当データなし
+
+## 停滞・減少情報
+- 目立つ停滞・減少データなし
+
+## summary由来の情報
+[]
+
+## SQLite由来の情報
+[
+  {
+    "name": "guild_snapshots",
+    "columns": [
+      "id",
+      "retrieved_at",
+      "guild_name",
+      "member_count",
+      "avg_cpm",
+      "total_cpm",
+      "created_at"
+    ],
+    "rows": [
+      {
+        "id": 4,
+        "retrieved_at": "2026-05-29 11:32",
+        "guild_name": "Astrklotho",
+        "member_count": 45,
+        "avg_cpm": 89840,
+        "total_cpm": 4042780,
+        "created_at": "2026-06-04 11:39:04"
+      },
+      {
+        "id": 100,
+        "retrieved_at": "2026-06-06 23:10",
+        "guild_name": "Astrklotho",
+        "member_count": 43,
+        "avg_cpm": 90617.67441860466,
+        "total_cpm": 3896560,
+        "created_at": "2026-06-06T14:10:45+00:00"
+      }
+    ]
+  },
+  {
+    "name": "guild_summary_snapshots",
+    "columns": [
+      "id",
+      "retrieved_at",
+      "guild_name",
+      "avg_cp",
+      "total_cp",
+      "total_family_cp",
+      "active_member_count",
+      "low_member_cp",
+      "high_member_cp",
+      "declared_on_other_guild",
+      "declared_by_other_guild",
+      "total_war",
+      "all_time_win_rate",
+      "most_war_with_guild",
+      "total_node_wars",
+      "node_won",
+      "total_siege_wars",
+      "siege_won",
+      "currently_holding",
+      "summary_json",
+      "created_at"
+    ],
+    "rows": [
+      {
+        "id": 40,
+        "retrieved_at": "2026-06-06 23:10",
+        "guild_name": "Astrklotho",
+        "avg_cp": 90633.0,
+        "total_cp": 3987843,
+        "total_family_cp": 22970654,
+        "active_member_count": 44,
+        "low_member_cp": 62647,
+        "high_member_cp": 113761,
+        "declared_on_other_guild": 0,
+        "declared_by_other_guild": 3,
+        "total_war": 3,
+        "all_time_win_rate": 33.33,
+        "most_war_with_guild": null,
+        "total_node_wars": 24,
+        "node_won": 14,
+        "total_siege_wars": 0,
+        "siege_won": 0,
+        "currently_holding": "None",
+        "summary_json": "{\"active_member_count\": \"44\", \"all_time_win_rate\": \"33.33%\", \"avg_cp\": \"90633\", \"currently_holding\": \"None\", \"declared_by_other_guild\": \"3\", \"declared_on_other_guild\": \"0\", \"high_member_cp\": \"113761\", \"low_member_cp\": \"62647\", \"most_war_with_guild\": \"\", \"node_won\": \"14\", \"siege_won\": \"0\", \"total_cp\": \"3987843\", \"total_family_cp\": \"22970654\", \"total_node_wars\": \"24\", \"total_siege_wars\": \"0\", \"total_war\": \"3\"}",
+        "created_at": "2026-06-06T14:10:45+00:00"
+      }
+    ]
+  },
+  {
+    "name": "member_snapshots",
+    "columns": [
+      "id",
+      "retrieved_at",
+      "guild_name",
+      "rank_no",
+      "class_name",
+      "family_name",
+      "level",
+      "cpm",
+      "fcp",
+      "created_at",
+      "class_name_raw",
+      "class_name_normalized",
+      "class_name_version"
+    ],
+    "rows": [
+      {
+        "id": 149,
+        "retrieved_at": "2026-05-29 11:32",
+        "guild_name": "Astrklotho",
+        "rank_no": 1,
+        "class_name": "",
+        "family_name": "sニャンコ先生s",
+        "level": 143,
+        "cpm": 112720,
+        "fcp": 749140,
+        "created_at": "2026-06-04 11:39:04",
+        "class_name_raw": null,
+        "class_name_normalized": null,
+        "class_name_version": null
+      },
+      {
+        "id": 150,
+        "retrieved_at": "2026-05-29 11:32",
+        "guild_name": "Astrklotho",
+        "rank_no": 2,
+        "class_name": "",
+        "family_name": "真釣",
+        "level": 143,
+        "cpm": 112600,
+        "fcp": 664788,
+        "created_at": "2026-06-04 11:39:04",
+        "class_name_raw": null,
+        "class_name_normalized": null,
+        "class_name_version": null
+      },
+      {
+        "id": 151,
+        "retrieved_at": "2026-05-29 11:32",
+        "guild_name": "Astrklotho",
+        "rank_no": 3,
+        "class_name": "",
+        "family_name": "孔雀FEH",
+        "level": 143,
+        "cpm": 111525,
+        "fcp": 697440,
+        "created_at": "2026-06-04 11:39:04",
+        "class_name_raw": null,
+        "class_name_normalized": null,
+        "class_name_version": null
+      },
+      {
+        "id": 152,
+        "retrieved_at": "2026-05-29 11:32",
+        "guild_name": "Astrklotho",
+        "rank_no": 4,
+        "class_name": "",
+        "family_name": "愛ぽんたん",
+        "level": 139,
+        "cpm": 111441,
+        "fcp": 561763,
+        "created_at": "2026-06-04 11:39:04",
+        "class_name_raw": null,
+        "class_name_normalized": null,
+        "class_name_version": null
+      },
+      {
+        "id": 153,
+        "retrieved_at": "2026-05-29 11:32",
+        "guild_name": "Astrklotho",
+        "rank_no": 5,
+        "class_name": "",
+        "family_name": "予想の達人",
+        "level": 135,
+        "cpm": 107835,
+        "fcp": 534856,
+        "created_at": "2026-06-04 11:39:04",
+        "class_name_raw": null,
+        "class_name_normalized": null,
+        "class_name_version": null
+      },
+      {
+        "id": 154,
+        "retrieved_at": "2026-05-29 11:32",
+        "guild_name": "Astrklotho",
+        "rank_no": 6,
+        "class_name": "",
+        "family_name": "八代将軍",
+        "level": 134,
+        "cpm": 103906,
+        "fcp": 822587,
+        "created_at": "2026-06-04 11:39:04",
+        "class_name_raw": null,
+        "class_name_normalized": null,
+        "class_name_version": null
+      },
+      {
+        "id": 155,
+        "retrieved_at": "2026-05-29 11:32",
+        "guild_name": "Astrklotho",
+        "rank_no": 7,
+        "class_name": "",
+        "family_name": "ぱてぃ",
+        "level": 135,
+        "cpm": 103507,
+        "fcp": 458844,
+        "created_at": "2026-06-04 11:39:04",
+        "class_name_raw": null,
+        "class_name_normalized": null,
+        "class_name_version": null
+      },
+      {
+        "id": 156,
+        "retrieved_at": "2026-05-29 11:32",
+        "guild_name": "Astrklotho",
+        "rank_no": 8,
+        "class_name": "",
+        "family_name": "頂き女子しゅわちゃん",
+        "level": 133,
+        "cpm": 100948,
+        "fcp": 510368,
+        "created_at": "2026-06-04 11:39:04",
+        "class_name_raw": null,
+        "class_name_normalized": null,
+        "class_name_version": null
+      },
+      {
+        "id": 157,
+        "retrieved_at": "2026-05-29 11:32",
+        "guild_name": "Astrklotho",
+        "rank_no": 9,
+        "class_name": "",
+        "family_name": "鏝伴・KOTEHAN",
+        "level": 130,
+        "cpm": 100195,
+        "fcp": 939347,
+        "created_at": "2026-06-04 11:39:04",
+        "class_name_raw": null,
+        "class_name_normalized": null,
+        "class_name_version": null
+      },
+      {
+        "id": 158,
+        "retrieved_at": "2026-05-29 11:32",
+        "guild_name": "Astrklotho",
+        "rank_no": 10,
+        "class_name": "",
+        "family_name": "Yap876",
+        "level": 129,
+        "cpm": 99666,
+        "fcp": 658191,
+        "created_at": "2026-06-04 11:39:04",
+        "class_name_raw": null,
+        "class_name_normalized": null,
+        "class_name_version": null
+      },
+      {
+        "id": 159,
+        "retrieved_at": "2026-05-29 11:32",
+        "guild_name": "Astrklotho",
+        "rank_no": 11,
+        "class_name": "",
+        "family_name": "ニッパー君",
+        "level": 124,
+        "cpm": 99231,
+        "fcp": 515771,
+        "created_at": "2026-06-04 11:39:04",
+        "class_name_raw": null,
+        "class_name_normalized": null,
+        "class_name_version": null
+      },
+      {
+        "id": 160,
+        "retrieved_at": "2026-05-29 11:32",
+        "guild_name": "Astrklotho",
+        "rank_no": 12,
+        "class_name": "",
+        "family_name": "セレ2ティ",
+        "level": 129,
+        "cpm": 97934,
+        "fcp": 353732,
+        "created_at": "2026-06-04 11:39:04",
+        "class_name_raw": null,
+        "class_name_normalized": null,
+        "class_name_version": null
+      },
+      {
+        "id": 161,
+        "retrieved_at": "2026-05-29 11:32",
+        "guild_name": "Astrklotho",
+        "rank_no": 13,
+        "class_name": "",
+        "family_name": "からあげ100",
+        "level": 126,
+        "cpm": 97709,
+        "fcp": 649991,
+        "created_at": "2026-06-04 11:39:04",
+        "class_name_raw": null,
+        "class_name_normalized": null,
+        "class_name_version": null
+      },
+      {
+        "id": 162,
+        "retrieved_at": "2026-05-29 11:32",
+        "guild_name": "Astrklotho",
+        "rank_no": 14,
+        "class_name": "",
+        "family_name": "まぐもぐちゃん",
+        "level": 131,
+        "cpm": 97318,
+        "fcp": 601723,
+        "created_at": "2026-06-04 11:39:04",
+        "class_name_raw": null,
+        "class_name_normalized": null,
+        "class_name_version": null
+      },
+      {
+        "id": 163,
+        "retrieved_at": "2026-05-29 11:32",
+        "guild_name": "Astrklotho",
+        "rank_no": 15,
+        "class_name": "",
+        "family_name": "猫汰ちゅな",
+        "level": 126,
+        "cpm": 96930,
+        "fcp": 339941,
+        "created_at": "2026-06-04 11:39:04",
+        "class_name_raw": null,
+        "class_name_normalized": null,
+        "class_name_version": null
+      },
+      {
+        "id": 164,
+        "retrieved_at": "2026-05-29 11:32",
+        "guild_name": "Astrklotho",
+        "rank_no": 16,
+        "class_name": "",
+        "family_name": "桃と檸檬",
+        "level": 121,
+        "cpm": 95837,
+        "fcp": 543162,
+        "created_at": "2026-06-04 11:39:04",
+        "class_name_raw": null,
+        "class_name_normalized": null,
+        "class_name_version": null
+      },
+      {
+        "id": 165,
+        "retrieved_at": "2026-05-29 11:32",
+        "guild_name": "Astrklotho",
+        "rank_no": 17,
+        "class_name": "",
+        "family_name": "ちこりぃーん",
+        "level": 128,
+        "cpm": 95834,
+        "fcp": 462069,
+        "created_at": "2026-06-04 11:39:04",
+        "class_name_raw": null,
+        "class_name_normalized": null,
+        "class_name_version": null
+      },
+      {
+        "id": 166,
+        "retrieved_at": "2026-05-29 11:32",
+        "guild_name": "Astrklotho",
+        "rank_no": 18,
+        "class_name": "",
+        "family_name": "隆ぽんたん",
+        "level": 122,
+        "cpm": 93415,
+        "fcp": 481363,
+        "created_at": "2026-06-04 11:39:04",
+        "class_name_raw": null,
+        "class_name_normalized": null,
+        "class_name_version": null
+      },
+      {
+        "id": 167,
+        "retrieved_at": "2026-05-29 11:32",
+        "guild_name": "Astrklotho",
+        "rank_no": 19,
+        "class_name": "",
+        "family_name": "Diadia",
+        "level": 129,
+        "cpm": 93394,
+        "fcp": 549566,
+        "created_at": "2026-06-04 11:39:04",
+        "class_name_raw": null,
+        "class_name_normalized": null,
+        "class_name_version": null
+      },
+      {
+        "id": 168,
+        "retrieved_at": "2026-05-29 11:32",
+        "guild_name": "Astrklotho",
+        "rank_no": 20,
+        "class_name": "",
+        "family_name": "九伴・KYUHAN",
+        "level": 124,
+        "cpm": 92439,
+        "fcp": 476861,
+        "created_at": "2026-06-04 11:39:04",
+        "class_name_raw": null,
+        "class_name_normalized": null,
+        "class_name_version": null
+      },
+      {
+        "id": 169,
+        "retrieved_at": "2026-05-29 11:32",
+        "guild_name": "Astrklotho",
+        "rank_no": 21,
+        "class_name": "",
+        "family_name": "てむしん",
+        "level": 122,
+        "cpm": 91778,
+        "fcp": 585566,
+        "created_at": "2026-06-04 11:39:04",
+        "class_name_raw": null,
+        "class_name_normalized": null,
+        "class_name_version": null
+      },
+      {
+        "id": 170,
+        "retrieved_at": "2026-05-29 11:32",
+        "guild_name": "Astrklotho",
+        "rank_no": 22,
+        "class_name": "",
+        "family_name": "ねこダイレクト大トロ",
+        "level": 123,
+        "cpm": 91624,
+        "fcp": 698627,
+        "created_at": "2026-06-04 11:39:04",
+        "class_name_raw": null,
+        "class_name_normalized": null,
+        "class_name_version": null
+      },
+      {
+        "id": 171,
+        "retrieved_at": "2026-05-29 11:32",
+        "guild_name": "Astrklotho",
+        "rank_no": 23,
+        "class_name": "",
+        "family_name": "チラリズム01",
+        "level": 118,
+        "cpm": 90619,
+        "fcp": 450535,
+        "created_at": "2026-06-04 11:39:04",
+        "class_name_raw": null,
+        "class_name_normalized": null,
+        "class_name_version": null
+      },
+      {
+        "id": 172,
+        "retrieved_at": "2026-05-29 11:32",
+        "guild_name": "Astrklotho",
+        "rank_no": 24,
+        "class_name": "",
+        "family_name": "露伴・ROHAN",
+        "level": 119,
+        "cpm": 89008,
+        "fcp": 681707,
+        "created_at": "2026-06-04 11:39:04",
+        "class_name_raw": null,
+        "class_name_normalized": null,
+        "class_name_version": null
+      },
+      {
+        "id": 173,
+        "retrieved_at": "2026-05-29 11:32",
+        "guild_name": "Astrklotho",
+        "rank_no": 25,
+        "class_name": "",
+        "family_name": "alice0316",
+        "level": 117,
+        "cpm": 88683,
+        "fcp": 518565,
+        "created_at": "2026-06-04 11:39:04",
+        "class_name_raw": null,
+        "class_name_normalized": null,
+        "class_name_version": null
+      },
+      {
+        "id": 174,
+        "retrieved_at": "2026-05-29 11:32",
+        "guild_name": "Astrklotho",
+        "rank_no": 26,
+        "class_name": "",
+        "family_name": "ポルポル君",
+        "level": 120,
+        "cpm": 88556,
+        "fcp": 454430,
+        "created_at": "2026-06-04 11:39:04",
+        "class_name_raw": null,
+        "class_name_normalized": null,
+        "class_name_version": null
+      },
+      {
+        "id": 175,
+        "retrieved_at": "2026-05-29 11:32",
+        "guild_name": "Astrklotho",
+        "rank_no": 27,
+        "class_name": "",
+        "family_name": "七曜の聖地",
+        "level": 122,
+        "cpm": 88195,
+        "fcp": 0,
+        "created_at": "2026-06-04 11:39:04",
+        "class_name_raw": null,
+        "class_name_normalized": null,
+        "class_name_version": null
+      },
+      {
+        "id": 176,
+        "retrieved_at": "2026-05-29 11:32",
+        "guild_name": "Astrklotho",
+        "rank_no": 28,
+        "class_name": "",
+        "family_name": "おとうふ",
+        "level": 118,
+        "cpm": 86903,
+        "fcp": 792401,
+        "created_at": "2026-06-04 11:39:04",
+        "class_name_raw": null,
+        "class_name_normalized": null,
+        "class_name_version": null
+      },
+      {
+        "id": 177,
+        "retrieved_at": "2026-05-29 11:32",
+        "guild_name": "Astrklotho",
+        "rank_no": 29,
+        "class_name": "",
+        "family_name": "紅ぽんたん",
+        "level": 115,
+        "cpm": 86079,
+        "fcp": 344492,
+        "created_at": "2026-06-04 11:39:04",
+        "class_name_raw": null,
+        "class_name_normalized": null,
+        "class_name_version": null
+      },
+      {
+        "id": 178,
+        "retrieved_at": "2026-05-29 11:32",
+        "guild_name": "Astrklotho",
+        "rank_no": 30,
+        "class_name": "",
+        "family_name": "こはくちーず",
+        "level": 117,
+        "cpm": 84965,
+        "fcp": 560028,
+        "created_at": "2026-06-04 11:39:04",
+        "class_name_raw": null,
+        "class_name_normalized": null,
+        "class_name_version": null
+      },
+      {
+        "id": 179,
+        "retrieved_at": "2026-05-29 11:32",
+        "guild_name": "Astrklotho",
+        "rank_no": 31,
+        "class_name": "",
+        "family_name": "maisama701",
+        "level": 120,
+        "cpm": 84518,
+        "fcp": 485633,
+        "created_at": "2026-06-04 11:39:04",
+        "class_name_raw": null,
+        "class_name_normalized": null,
+        "class_name_version": null
+      },
+      {
+        "id": 180,
+        "retrieved_at": "2026-05-29 11:32",
+        "guild_name": "Astrklotho",
+        "rank_no": 32,
+        "class_name": "",
+        "family_name": "K・RK",
+        "level": 110,
+        "cpm": 83903,
+        "fcp": 605988,
+        "created_at": "2026-06-04 11:39:04",
+        "class_name_raw": null,
+        "class_name_normalized": null,
+        "class_name_version": null
+      },
+      {
+        "id": 181,
+        "retrieved_at": "2026-05-29 11:32",
+        "guild_name": "Astrklotho",
+        "rank_no": 33,
+        "class_name": "",
+        "family_name": "SPADA19",
+        "level": 109,
+        "cpm": 83428,
+        "fcp": 475620,
+        "created_at": "2026-06-04 11:39:04",
+        "class_name_raw": null,
+        "class_name_normalized": null,
+        "class_name_version": null
+      },
+      {
+        "id": 182,
+        "retrieved_at": "2026-05-29 11:32",
+        "guild_name": "Astrklotho",
+        "rank_no": 34,
+        "class_name": "",
+        "family_name": "カミジョウ",
+        "level": 113,
+        "cpm": 82678,
+        "fcp": 459793,
+        "created_at": "2026-06-04 11:39:04",
+        "class_name_raw": null,
+        "class_name_normalized": null,
+        "class_name_version": null
+      },
+      {
+        "id": 183,
+        "retrieved_at": "2026-05-29 11:32",
+        "guild_name": "Astrklotho",
+        "rank_no": 35,
+        "class_name": "",
+        "family_name": "0imo",
+        "level": 111,
+        "cpm": 81878,
+        "fcp": 581090,
+        "created_at": "2026-06-04 11:39:04",
+        "class_name_raw": null,
+        "class_name_normalized": null,
+        "class_name_version": null
+      },
+      {
+        "id": 184,
+        "retrieved_at": "2026-05-29 11:32",
+        "guild_name": "Astrklotho",
+        "rank_no": 36,
+        "class_name": "",
+        "family_name": "月詠み",
+        "level": 116,
+        "cpm": 81524,
+        "fcp": 429284,
+        "created_at": "2026-06-04 11:39:04",
+        "class_name_raw": null,
+        "class_name_normalized": null,
+        "class_name_version": null
+      },
+      {
+        "id": 185,
+        "retrieved_at": "2026-05-29 11:32",
+        "guild_name": "Astrklotho",
+        "rank_no": 37,
+        "class_name": "",
+        "family_name": "プラナリアの日報",
+        "level": 105,
+        "cpm": 76014,
+        "fcp": 369687,
+        "created_at": "2026-06-04 11:39:04",
+        "class_name_raw": null,
+        "class_name_normalized": null,
+        "class_name_version": null
+      },
+      {
+        "id": 186,
+        "retrieved_at": "2026-05-29 11:32",
+        "guild_name": "Astrklotho",
+        "rank_no": 38,
+        "class_name": "",
+        "family_name": "苺ギフト券",
+        "level": 115,
+        "cpm": 75057,
+        "fcp": 468536,
+        "created_at": "2026-06-04 11:39:04",
+        "class_name_raw": null,
+        "class_name_normalized": null,
+        "class_name_version": null
+      },
+      {
+        "id": 187,
+        "retrieved_at": "2026-05-29 11:32",
+        "guild_name": "Astrklotho",
+        "rank_no": 39,
+        "class_name": "",
+        "family_name": "ぽいみん",
+        "level": 103,
+        "cpm": 73617,
+        "fcp": 357531,
+        "created_at": "2026-06-04 11:39:04",
+        "class_name_raw": null,
+        "class_name_normalized": null,
+        "class_name_version": null
+      },
+      {
+        "id": 188,
+        "retrieved_at": "2026-05-29 11:32",
+        "guild_name": "Astrklotho",
+        "rank_no": 40,
+        "class_name": "",
+        "family_name": "最終進化的りょたん",
+        "level": 110,
+        "cpm": 72160,
+        "fcp": 583270,
+        "created_at": "2026-06-04 11:39:04",
+        "class_name_raw": null,
+        "class_name_normalized": null,
+        "class_name_version": null
+      },
+      {
+        "id": 189,
+        "retrieved_at": "2026-05-29 11:32",
+        "guild_name": "Astrklotho",
+        "rank_no": 41,
+        "class_name": "",
+        "family_name": "STOIST",
+        "level": 102,
+        "cpm": 71120,
+        "fcp": 0,
+        "created_at": "2026-06-04 11:39:04",
+        "class_name_raw": null,
+        "class_name_normalized": null,
+        "class_name_version": null
+      },
+      {
+        "id": 190,
+        "retrieved_at": "2026-05-29 11:32",
+        "guild_name": "Astrklotho",
+        "rank_no": 42,
+        "class_name": "",
+        "family_name": "オサシミ",
+        "level": 103,
+        "cpm": 67245,
+        "fcp": 0,
+        "created_at": "2026-06-04 11:39:04",
+        "class_name_raw": null,
+        "class_name_normalized": null,
+        "class_name_version": null
+      },
+      {
+        "id": 191,
+        "retrieved_at": "2026-05-29 11:32",
+        "guild_name": "Astrklotho",
+        "rank_no": 43,
+        "class_name": "",
+        "family_name": "sらぴすz",
+        "level": 115,
+        "cpm": 66825,
+        "fcp": 467337,
+        "created_at": "2026-06-04 11:39:04",
+        "class_name_raw": null,
+        "class_name_normalized": null,
+        "class_name_version": null
+      },
+      {
+        "id": 192,
+        "retrieved_at": "2026-05-29 11:32",
+        "guild_name": "Astrklotho",
+        "rank_no": 44,
+        "class_name": "",
+        "family_name": "佐佐木異三郎",
+        "level": 113,
+        "cpm": 66273,
+        "fcp": 382654,
+        "created_at": "2026-06-04 11:39:04",
+        "class_name_raw": null,
+        "class_name_normalized": null,
+        "class_name_version": null
+      },
+      {
+        "id": 193,
+        "retrieved_at": "2026-05-29 11:32",
+        "guild_name": "Astrklotho",
+        "rank_no": 45,
+        "class_name": "",
+        "family_name": "らておーれ",
+        "level": 104,
+        "cpm": 66172,
+        "fcp": 424445,
+        "created_at": "2026-06-04 11:39:04",
+        "class_name_raw": null,
+        "class_name_normalized": null,
+        "class_name_version": null
+      }
+    ]
+  }
+]
+
+## PVカルテ由来の推移情報
+{
+  "record_count": 0,
+  "latest_rows": [],
+  "growth_top": [],
+  "stagnant_or_decline": []
+}
+
+## ギルドファイル由来の情報
+[]
+
+## AIへの作文指示
+- 上記の材料だけを使って、このギルド専用の自然な日本語コメントを作成してください。
+- 数字が不足している項目は断定せず、情報不足として扱ってください。
+- 良い点、注意点、次に見るべき点が分かる文章にしてください。
+- 出力は指定されたJSON形式だけにしてください。

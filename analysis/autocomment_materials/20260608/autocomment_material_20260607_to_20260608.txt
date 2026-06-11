@@ -1,0 +1,191 @@
+# AutoComment AI作文材料
+旧日付: 2026-06-07
+新日付: 2026-06-08
+
+## warnings
+- 表示件数: 50 / 総数 3261
+- 指定日付を含むsummary_*.xlsxが見つかりません。探索日付形式=['2026-06-07', '2026-06-08', '2026/06/07', '2026/06/08', '20260607', '20260608']。全summaryを材料候補にします。
+- xlsxシート実体が見つかりません: D:\bdm-guild-karte\analysis\summary_2026-05-29.xlsx / guild_metrics
+- xlsxシート実体が見つかりません: D:\bdm-guild-karte\analysis\summary_2026-05-29.xlsx / rankings
+- xlsxシート実体が見つかりません: D:\bdm-guild-karte\analysis\summary_2026-05-29.xlsx / settings
+- xlsxシート実体が見つかりません: D:\bdm-guild-karte\analysis\summary_2026-06-01.xlsx / guild_metrics
+- xlsxシート実体が見つかりません: D:\bdm-guild-karte\analysis\summary_2026-06-01.xlsx / rankings
+- xlsxシート実体が見つかりません: D:\bdm-guild-karte\analysis\summary_2026-06-01.xlsx / settings
+- xlsxシート実体が見つかりません: D:\bdm-guild-karte\analysis\summary_2026-06-02.xlsx / guild_metrics
+- xlsxシート実体が見つかりません: D:\bdm-guild-karte\analysis\summary_2026-06-02.xlsx / rankings
+- xlsxシート実体が見つかりません: D:\bdm-guild-karte\analysis\summary_2026-06-02.xlsx / settings
+- xlsxシート実体が見つかりません: D:\bdm-guild-karte\analysis\summary_2026-06-05.xlsx / guild_metrics
+- xlsxシート実体が見つかりません: D:\bdm-guild-karte\analysis\summary_2026-06-05.xlsx / rankings
+- xlsxシート実体が見つかりません: D:\bdm-guild-karte\analysis\summary_2026-06-05.xlsx / settings
+- xlsxシート実体が見つかりません: D:\bdm-guild-karte\analysis\summary_2026-06-06.xlsx / guild_metrics
+- xlsxシート実体が見つかりません: D:\bdm-guild-karte\analysis\summary_2026-06-06.xlsx / rankings
+- xlsxシート実体が見つかりません: D:\bdm-guild-karte\analysis\summary_2026-06-06.xlsx / settings
+- 指定日付を含むdeta_PV直下のxlsxが見つかりません。探索日付形式=['2026-06-07', '2026-06-08', '2026/06/07', '2026/06/08', '20260607', '20260608']。直下xlsxを材料候補にします。
+- xlsxシート実体が見つかりません: D:\bdm-guild-karte\deta_PV\AlmaVivaJP_Cosmos.xlsx / データ
+- xlsxシート実体が見つかりません: D:\bdm-guild-karte\deta_PV\AlmaVivaJP_Cosmos.xlsx / グラフ
+- xlsxシート実体が見つかりません: D:\bdm-guild-karte\deta_PV\AlmaVivaJP_eikiJP.xlsx / データ
+- xlsxシート実体が見つかりません: D:\bdm-guild-karte\deta_PV\AlmaVivaJP_eikiJP.xlsx / グラフ
+- xlsxシート実体が見つかりません: D:\bdm-guild-karte\deta_PV\AlmaVivaJP_everfree.xlsx / データ
+- xlsxシート実体が見つかりません: D:\bdm-guild-karte\deta_PV\AlmaVivaJP_everfree.xlsx / グラフ
+- xlsxシート実体が見つかりません: D:\bdm-guild-karte\deta_PV\AlmaVivaJP_FortunaH.xlsx / データ
+- xlsxシート実体が見つかりません: D:\bdm-guild-karte\deta_PV\AlmaVivaJP_FortunaH.xlsx / グラフ
+- xlsxシート実体が見つかりません: D:\bdm-guild-karte\deta_PV\AlmaVivaJP_guppin・g・.xlsx / データ
+- xlsxシート実体が見つかりません: D:\bdm-guild-karte\deta_PV\AlmaVivaJP_guppin・g・.xlsx / グラフ
+- xlsxシート実体が見つかりません: D:\bdm-guild-karte\deta_PV\AlmaVivaJP_HANABI.xlsx / データ
+- xlsxシート実体が見つかりません: D:\bdm-guild-karte\deta_PV\AlmaVivaJP_HANABI.xlsx / グラフ
+- xlsxシート実体が見つかりません: D:\bdm-guild-karte\deta_PV\AlmaVivaJP_Love.xlsx / データ
+- xlsxシート実体が見つかりません: D:\bdm-guild-karte\deta_PV\AlmaVivaJP_Love.xlsx / グラフ
+- xlsxシート実体が見つかりません: D:\bdm-guild-karte\deta_PV\AlmaVivaJP_overwork.xlsx / データ
+- xlsxシート実体が見つかりません: D:\bdm-guild-karte\deta_PV\AlmaVivaJP_overwork.xlsx / グラフ
+- xlsxシート実体が見つかりません: D:\bdm-guild-karte\deta_PV\AlmaVivaJP_VARONofJAPAN.xlsx / データ
+- xlsxシート実体が見つかりません: D:\bdm-guild-karte\deta_PV\AlmaVivaJP_VARONofJAPAN.xlsx / グラフ
+- xlsxシート実体が見つかりません: D:\bdm-guild-karte\deta_PV\AlmaVivaJP_ö鬼殺隊ö.xlsx / データ
+- xlsxシート実体が見つかりません: D:\bdm-guild-karte\deta_PV\AlmaVivaJP_ö鬼殺隊ö.xlsx / グラフ
+- xlsxシート実体が見つかりません: D:\bdm-guild-karte\deta_PV\AlmaVivaJP_あっ・ぼたもちモッチ.xlsx / データ
+- xlsxシート実体が見つかりません: D:\bdm-guild-karte\deta_PV\AlmaVivaJP_あっ・ぼたもちモッチ.xlsx / グラフ
+- xlsxシート実体が見つかりません: D:\bdm-guild-karte\deta_PV\AlmaVivaJP_あつみん.xlsx / データ
+- xlsxシート実体が見つかりません: D:\bdm-guild-karte\deta_PV\AlmaVivaJP_あつみん.xlsx / グラフ
+- xlsxシート実体が見つかりません: D:\bdm-guild-karte\deta_PV\AlmaVivaJP_おゆに・D会長.xlsx / データ
+- xlsxシート実体が見つかりません: D:\bdm-guild-karte\deta_PV\AlmaVivaJP_おゆに・D会長.xlsx / グラフ
+- xlsxシート実体が見つかりません: D:\bdm-guild-karte\deta_PV\AlmaVivaJP_そにゃ.xlsx / データ
+- xlsxシート実体が見つかりません: D:\bdm-guild-karte\deta_PV\AlmaVivaJP_そにゃ.xlsx / グラフ
+- xlsxシート実体が見つかりません: D:\bdm-guild-karte\deta_PV\AlmaVivaJP_だれだあててみて.xlsx / データ
+- xlsxシート実体が見つかりません: D:\bdm-guild-karte\deta_PV\AlmaVivaJP_だれだあててみて.xlsx / グラフ
+- xlsxシート実体が見つかりません: D:\bdm-guild-karte\deta_PV\AlmaVivaJP_でみたま.xlsx / データ
+- xlsxシート実体が見つかりません: D:\bdm-guild-karte\deta_PV\AlmaVivaJP_でみたま.xlsx / グラフ
+- warningsは50件まで表示しています。残り3212件は省略しました。
+
+## debug_dates
+{
+  "old_input": "2026-06-07",
+  "new_input": "2026-06-08",
+  "old_display_date": "2026-06-07",
+  "new_display_date": "2026-06-08",
+  "old_compact_date": "20260607",
+  "new_compact_date": "20260608",
+  "old_search_tokens": [
+    "2026-06-07",
+    "20260607",
+    "2026/06/07"
+  ],
+  "new_search_tokens": [
+    "2026-06-08",
+    "20260608",
+    "2026/06/08"
+  ]
+}
+
+## debug_sheetnames
+### summaries
+- D:\bdm-guild-karte\analysis\summary_2026-05-29.xlsx: sheetnames=['guild_metrics', 'rankings', 'settings'], summary=[], pv=[]
+- D:\bdm-guild-karte\analysis\summary_2026-06-01.xlsx: sheetnames=['guild_metrics', 'rankings', 'settings'], summary=[], pv=[]
+- D:\bdm-guild-karte\analysis\summary_2026-06-02.xlsx: sheetnames=['guild_metrics', 'rankings', 'settings'], summary=[], pv=[]
+- D:\bdm-guild-karte\analysis\summary_2026-06-05.xlsx: sheetnames=['guild_metrics', 'rankings', 'settings'], summary=[], pv=[]
+- D:\bdm-guild-karte\analysis\summary_2026-06-06.xlsx: sheetnames=['guild_metrics', 'rankings', 'settings'], summary=[], pv=[]
+### personal_pv
+- D:\bdm-guild-karte\deta_PV\AlmaVivaJP_Cosmos.xlsx: sheetnames=['データ', 'グラフ'], summary=[], pv=[]
+- D:\bdm-guild-karte\deta_PV\AlmaVivaJP_eikiJP.xlsx: sheetnames=['データ', 'グラフ'], summary=[], pv=[]
+- D:\bdm-guild-karte\deta_PV\AlmaVivaJP_everfree.xlsx: sheetnames=['データ', 'グラフ'], summary=[], pv=[]
+- D:\bdm-guild-karte\deta_PV\AlmaVivaJP_FortunaH.xlsx: sheetnames=['データ', 'グラフ'], summary=[], pv=[]
+- D:\bdm-guild-karte\deta_PV\AlmaVivaJP_guppin・g・.xlsx: sheetnames=['データ', 'グラフ'], summary=[], pv=[]
+- D:\bdm-guild-karte\deta_PV\AlmaVivaJP_HANABI.xlsx: sheetnames=['データ', 'グラフ'], summary=[], pv=[]
+- D:\bdm-guild-karte\deta_PV\AlmaVivaJP_Love.xlsx: sheetnames=['データ', 'グラフ'], summary=[], pv=[]
+- D:\bdm-guild-karte\deta_PV\AlmaVivaJP_overwork.xlsx: sheetnames=['データ', 'グラフ'], summary=[], pv=[]
+- D:\bdm-guild-karte\deta_PV\AlmaVivaJP_VARONofJAPAN.xlsx: sheetnames=['データ', 'グラフ'], summary=[], pv=[]
+- D:\bdm-guild-karte\deta_PV\AlmaVivaJP_ö鬼殺隊ö.xlsx: sheetnames=['データ', 'グラフ'], summary=[], pv=[]
+- D:\bdm-guild-karte\deta_PV\AlmaVivaJP_あっ・ぼたもちモッチ.xlsx: sheetnames=['データ', 'グラフ'], summary=[], pv=[]
+- D:\bdm-guild-karte\deta_PV\AlmaVivaJP_あつみん.xlsx: sheetnames=['データ', 'グラフ'], summary=[], pv=[]
+- D:\bdm-guild-karte\deta_PV\AlmaVivaJP_おゆに・D会長.xlsx: sheetnames=['データ', 'グラフ'], summary=[], pv=[]
+- D:\bdm-guild-karte\deta_PV\AlmaVivaJP_そにゃ.xlsx: sheetnames=['データ', 'グラフ'], summary=[], pv=[]
+- D:\bdm-guild-karte\deta_PV\AlmaVivaJP_だれだあててみて.xlsx: sheetnames=['データ', 'グラフ'], summary=[], pv=[]
+- D:\bdm-guild-karte\deta_PV\AlmaVivaJP_でみたま.xlsx: sheetnames=['データ', 'グラフ'], summary=[], pv=[]
+- D:\bdm-guild-karte\deta_PV\AlmaVivaJP_とおり雨.xlsx: sheetnames=['データ', 'グラフ'], summary=[], pv=[]
+- D:\bdm-guild-karte\deta_PV\AlmaVivaJP_なべ彡.xlsx: sheetnames=['データ', 'グラフ'], summary=[], pv=[]
+- D:\bdm-guild-karte\deta_PV\AlmaVivaJP_はりゅら.xlsx: sheetnames=['データ', 'グラフ'], summary=[], pv=[]
+- D:\bdm-guild-karte\deta_PV\AlmaVivaJP_ぱぱまる.xlsx: sheetnames=['データ', 'グラフ'], summary=[], pv=[]
+- ... 残り180件のsheetnames debugはJSONを確認してください。
+### unknown_pv
+### guild_files
+
+## guild_output_index
+- AlmaVivaJP: D:\bdm-guild-karte\analysis\autocomment_materials\20260608\guilds\AlmaVivaJP\material_AlmaVivaJP_20260607_to_20260608.txt
+- Astrklotho: D:\bdm-guild-karte\analysis\autocomment_materials\20260608\guilds\Astrklotho\material_Astrklotho_20260607_to_20260608.txt
+- C0BRA: D:\bdm-guild-karte\analysis\autocomment_materials\20260608\guilds\C0BRA\material_C0BRA_20260607_to_20260608.txt
+- Demise: D:\bdm-guild-karte\analysis\autocomment_materials\20260608\guilds\Demise\material_Demise_20260607_to_20260608.txt
+- Döraè่mön: D:\bdm-guild-karte\analysis\autocomment_materials\20260608\guilds\Döraè่mön\material_Döraè่mön_20260607_to_20260608.txt
+- Kopitiam: D:\bdm-guild-karte\analysis\autocomment_materials\20260608\guilds\Kopitiam\material_Kopitiam_20260607_to_20260608.txt
+- Maverickz: D:\bdm-guild-karte\analysis\autocomment_materials\20260608\guilds\Maverickz\material_Maverickz_20260607_to_20260608.txt
+- Myst: D:\bdm-guild-karte\analysis\autocomment_materials\20260608\guilds\Myst\material_Myst_20260607_to_20260608.txt
+- MÏRÃGË: D:\bdm-guild-karte\analysis\autocomment_materials\20260608\guilds\MÏRÃGË\material_MÏRÃGË_20260607_to_20260608.txt
+- M三OW: D:\bdm-guild-karte\analysis\autocomment_materials\20260608\guilds\M三OW\material_M三OW_20260607_to_20260608.txt
+- Orzeca: D:\bdm-guild-karte\analysis\autocomment_materials\20260608\guilds\Orzeca\material_Orzeca_20260607_to_20260608.txt
+- Pandora: D:\bdm-guild-karte\analysis\autocomment_materials\20260608\guilds\Pandora\material_Pandora_20260607_to_20260608.txt
+- Phoenix: D:\bdm-guild-karte\analysis\autocomment_materials\20260608\guilds\Phoenix\material_Phoenix_20260607_to_20260608.txt
+- PokemonGo: D:\bdm-guild-karte\analysis\autocomment_materials\20260608\guilds\PokemonGo\material_PokemonGo_20260607_to_20260608.txt
+- PONYTAIL: D:\bdm-guild-karte\analysis\autocomment_materials\20260608\guilds\PONYTAIL\material_PONYTAIL_20260607_to_20260608.txt
+- RaиkSS: D:\bdm-guild-karte\analysis\autocomment_materials\20260608\guilds\RaиkSS\material_RaиkSS_20260607_to_20260608.txt
+- REGENCY彡: D:\bdm-guild-karte\analysis\autocomment_materials\20260608\guilds\REGENCY彡\material_REGENCY彡_20260607_to_20260608.txt
+- Revenant: D:\bdm-guild-karte\analysis\autocomment_materials\20260608\guilds\Revenant\material_Revenant_20260607_to_20260608.txt
+- RëBîrth: D:\bdm-guild-karte\analysis\autocomment_materials\20260608\guilds\RëBîrth\material_RëBîrth_20260607_to_20260608.txt
+- SЕRЕNIТY: D:\bdm-guild-karte\analysis\autocomment_materials\20260608\guilds\SЕRЕNIТY\material_SЕRЕNIТY_20260607_to_20260608.txt
+- TRAITORs: D:\bdm-guild-karte\analysis\autocomment_materials\20260608\guilds\TRAITORs\material_TRAITORs_20260607_to_20260608.txt
+- Unity: D:\bdm-guild-karte\analysis\autocomment_materials\20260608\guilds\Unity\material_Unity_20260607_to_20260608.txt
+- VainqueurJP: D:\bdm-guild-karte\analysis\autocomment_materials\20260608\guilds\VainqueurJP\material_VainqueurJP_20260607_to_20260608.txt
+- xAEGISx: D:\bdm-guild-karte\analysis\autocomment_materials\20260608\guilds\xAEGISx\material_xAEGISx_20260607_to_20260608.txt
+- シェイド: D:\bdm-guild-karte\analysis\autocomment_materials\20260608\guilds\シェイド\material_シェイド_20260607_to_20260608.txt
+- ・殺戮・: D:\bdm-guild-karte\analysis\autocomment_materials\20260608\guilds\・殺戮・\material_・殺戮・_20260607_to_20260608.txt
+- ーEspoirー: D:\bdm-guild-karte\analysis\autocomment_materials\20260608\guilds\ーEspoirー\material_ーEspoirー_20260607_to_20260608.txt
+- ーリベリオンー: D:\bdm-guild-karte\analysis\autocomment_materials\20260608\guilds\ーリベリオンー\material_ーリベリオンー_20260607_to_20260608.txt
+- 一Arch一: D:\bdm-guild-karte\analysis\autocomment_materials\20260608\guilds\一Arch一\material_一Arch一_20260607_to_20260608.txt
+- 一SUN一: D:\bdm-guild-karte\analysis\autocomment_materials\20260608\guilds\一SUN一\material_一SUN一_20260607_to_20260608.txt
+- 一惡人谷一: D:\bdm-guild-karte\analysis\autocomment_materials\20260608\guilds\一惡人谷一\material_一惡人谷一_20260607_to_20260608.txt
+- 亗Luxúria亗: D:\bdm-guild-karte\analysis\autocomment_materials\20260608\guilds\亗Luxúria亗\material_亗Luxúria亗_20260607_to_20260608.txt
+- 低調時尚: D:\bdm-guild-karte\analysis\autocomment_materials\20260608\guilds\低調時尚\material_低調時尚_20260607_to_20260608.txt
+- 天機: D:\bdm-guild-karte\analysis\autocomment_materials\20260608\guilds\天機\material_天機_20260607_to_20260608.txt
+- 廣寒宮: D:\bdm-guild-karte\analysis\autocomment_materials\20260608\guilds\廣寒宮\material_廣寒宮_20260607_to_20260608.txt
+- 微笑Party: D:\bdm-guild-karte\analysis\autocomment_materials\20260608\guilds\微笑Party\material_微笑Party_20260607_to_20260608.txt
+- 心晴: D:\bdm-guild-karte\analysis\autocomment_materials\20260608\guilds\心晴\material_心晴_20260607_to_20260608.txt
+- 毛家村: D:\bdm-guild-karte\analysis\autocomment_materials\20260608\guilds\毛家村\material_毛家村_20260607_to_20260608.txt
+- 氣噗噗讓玻璃心碎一地: D:\bdm-guild-karte\analysis\autocomment_materials\20260608\guilds\氣噗噗讓玻璃心碎一地\material_氣噗噗讓玻璃心碎一地_20260607_to_20260608.txt
+- 沙漠黑鷹: D:\bdm-guild-karte\analysis\autocomment_materials\20260608\guilds\沙漠黑鷹\material_沙漠黑鷹_20260607_to_20260608.txt
+- 深藍幻境: D:\bdm-guild-karte\analysis\autocomment_materials\20260608\guilds\深藍幻境\material_深藍幻境_20260607_to_20260608.txt
+- 當惡魔遇到殺手貓: D:\bdm-guild-karte\analysis\autocomment_materials\20260608\guilds\當惡魔遇到殺手貓\material_當惡魔遇到殺手貓_20260607_to_20260608.txt
+- 雪狼族: D:\bdm-guild-karte\analysis\autocomment_materials\20260608\guilds\雪狼族\material_雪狼族_20260607_to_20260608.txt
+- 雲淡風輕o: D:\bdm-guild-karte\analysis\autocomment_materials\20260608\guilds\雲淡風輕o\material_雲淡風輕o_20260607_to_20260608.txt
+- 黄昏のえりしおん: D:\bdm-guild-karte\analysis\autocomment_materials\20260608\guilds\黄昏のえりしおん\material_黄昏のえりしおん_20260607_to_20260608.txt
+- 黒の太陽: D:\bdm-guild-karte\analysis\autocomment_materials\20260608\guilds\黒の太陽\material_黒の太陽_20260607_to_20260608.txt
+- 349: D:\bdm-guild-karte\analysis\autocomment_materials\20260608\guilds\349\material_349_20260607_to_20260608.txt
+- 130: D:\bdm-guild-karte\analysis\autocomment_materials\20260608\guilds\130\material_130_20260607_to_20260608.txt
+- 0: D:\bdm-guild-karte\analysis\autocomment_materials\20260608\guilds\0\material_0_20260607_to_20260608.txt
+- 6: D:\bdm-guild-karte\analysis\autocomment_materials\20260608\guilds\6\material_6_20260607_to_20260608.txt
+- None: D:\bdm-guild-karte\analysis\autocomment_materials\20260608\guilds\None\material_None_20260607_to_20260608.txt
+- 1: D:\bdm-guild-karte\analysis\autocomment_materials\20260608\guilds\1\material_1_20260607_to_20260608.txt
+- 3: D:\bdm-guild-karte\analysis\autocomment_materials\20260608\guilds\3\material_3_20260607_to_20260608.txt
+- 11: D:\bdm-guild-karte\analysis\autocomment_materials\20260608\guilds\11\material_11_20260607_to_20260608.txt
+- 5: D:\bdm-guild-karte\analysis\autocomment_materials\20260608\guilds\5\material_5_20260607_to_20260608.txt
+- 便當十號店: D:\bdm-guild-karte\analysis\autocomment_materials\20260608\guilds\便當十號店\material_便當十號店_20260607_to_20260608.txt
+- 28: D:\bdm-guild-karte\analysis\autocomment_materials\20260608\guilds\28\material_28_20260607_to_20260608.txt
+- 12: D:\bdm-guild-karte\analysis\autocomment_materials\20260608\guilds\12\material_12_20260607_to_20260608.txt
+- 4: D:\bdm-guild-karte\analysis\autocomment_materials\20260608\guilds\4\material_4_20260607_to_20260608.txt
+- 7: D:\bdm-guild-karte\analysis\autocomment_materials\20260608\guilds\7\material_7_20260607_to_20260608.txt
+- 8: D:\bdm-guild-karte\analysis\autocomment_materials\20260608\guilds\8\material_8_20260607_to_20260608.txt
+- 51: D:\bdm-guild-karte\analysis\autocomment_materials\20260608\guilds\51\material_51_20260607_to_20260608.txt
+- 64: D:\bdm-guild-karte\analysis\autocomment_materials\20260608\guilds\64\material_64_20260607_to_20260608.txt
+- 2: D:\bdm-guild-karte\analysis\autocomment_materials\20260608\guilds\2\material_2_20260607_to_20260608.txt
+- 14: D:\bdm-guild-karte\analysis\autocomment_materials\20260608\guilds\14\material_14_20260607_to_20260608.txt
+- 38: D:\bdm-guild-karte\analysis\autocomment_materials\20260608\guilds\38\material_38_20260607_to_20260608.txt
+- 109: D:\bdm-guild-karte\analysis\autocomment_materials\20260608\guilds\109\material_109_20260607_to_20260608.txt
+- 80: D:\bdm-guild-karte\analysis\autocomment_materials\20260608\guilds\80\material_80_20260607_to_20260608.txt
+- 120: D:\bdm-guild-karte\analysis\autocomment_materials\20260608\guilds\120\material_120_20260607_to_20260608.txt
+- 678: D:\bdm-guild-karte\analysis\autocomment_materials\20260608\guilds\678\material_678_20260607_to_20260608.txt
+- 163: D:\bdm-guild-karte\analysis\autocomment_materials\20260608\guilds\163\material_163_20260607_to_20260608.txt
+- Иouver: D:\bdm-guild-karte\analysis\autocomment_materials\20260608\guilds\Иouver\material_Иouver_20260607_to_20260608.txt
+
+## record_counts
+{
+  "summary_records": 0,
+  "personal_pv_records": 0,
+  "unknown_pv_records": 0
+}
+
+※ AI作文の本命材料は、この全体indexではなく guilds/<guild_name>/material_*.txt または material_*.json です。

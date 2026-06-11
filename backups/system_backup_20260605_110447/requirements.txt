@@ -1,0 +1,7 @@
+﻿playwright
+python-dotenv
+openpyxl
+pywin32; platform_system == "Windows"
+PySide6
+pillow
+discord.py

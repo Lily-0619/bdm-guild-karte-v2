@@ -1,0 +1,331 @@
+# ギルド別AutoComment AI作文材料
+ギルド名: 38
+対象期間: 2026-06-07 → 2026-06-08
+
+## 材料不足・注意
+- summary由来のギルド集計情報が不足しています。
+- PVカルテ由来の個人推移情報が不足しています。
+
+## 主要指標
+- 人数: None
+- 平均CPM: None
+- 総CPM: None
+- 順位: None
+
+## 前回との差分
+- 差分を計算できる前回データが不足しています。
+
+## メンバー変化
+- 完全一致人数: None
+- 新規加入者: []
+- 追跡不明者: []
+- 名前変更者: []
+- 移籍者: []
+
+## CPM伸び上位
+- 該当データなし
+
+## 停滞・減少情報
+- 目立つ停滞・減少データなし
+
+## summary由来の情報
+[]
+
+## SQLite由来の情報
+[
+  {
+    "name": "guild_snapshots",
+    "columns": [
+      "id",
+      "retrieved_at",
+      "guild_name",
+      "member_count",
+      "avg_cpm",
+      "total_cpm",
+      "created_at"
+    ],
+    "rows": [
+      {
+        "id": 38,
+        "retrieved_at": "2026-06-01 12:30",
+        "guild_name": "ーEspoirー",
+        "member_count": 38,
+        "avg_cpm": 92713,
+        "total_cpm": 3615822,
+        "created_at": "2026-06-04 11:39:28"
+      },
+      {
+        "id": 40,
+        "retrieved_at": "2026-05-29 11:40",
+        "guild_name": "一Arch一",
+        "member_count": 38,
+        "avg_cpm": 98061,
+        "total_cpm": 4118559,
+        "created_at": "2026-06-04 11:39:28"
+      }
+    ]
+  },
+  {
+    "name": "guild_summary_snapshots",
+    "columns": [
+      "id",
+      "retrieved_at",
+      "guild_name",
+      "avg_cp",
+      "total_cp",
+      "total_family_cp",
+      "active_member_count",
+      "low_member_cp",
+      "high_member_cp",
+      "declared_on_other_guild",
+      "declared_by_other_guild",
+      "total_war",
+      "all_time_win_rate",
+      "most_war_with_guild",
+      "total_node_wars",
+      "node_won",
+      "total_siege_wars",
+      "siege_won",
+      "currently_holding",
+      "summary_json",
+      "created_at"
+    ],
+    "rows": [
+      {
+        "id": 9,
+        "retrieved_at": "2026-06-06 21:26",
+        "guild_name": "RaиkSS",
+        "avg_cp": 112771.0,
+        "total_cp": 5525763,
+        "total_family_cp": 29809958,
+        "active_member_count": 49,
+        "low_member_cp": 103581,
+        "high_member_cp": 136812,
+        "declared_on_other_guild": 28,
+        "declared_by_other_guild": 12,
+        "total_war": 40,
+        "all_time_win_rate": 87.18,
+        "most_war_with_guild": "・殺戮・",
+        "total_node_wars": 38,
+        "node_won": 33,
+        "total_siege_wars": 82,
+        "siege_won": 58,
+        "currently_holding": "T3 Rhutum Outstation",
+        "summary_json": "{\"active_member_count\": \"49\", \"all_time_win_rate\": \"87.18%\", \"avg_cp\": \"112771\", \"currently_holding\": \"T3 Rhutum Outstation\", \"declared_by_other_guild\": \"12\", \"declared_on_other_guild\": \"28\", \"high_member_cp\": \"136812\", \"low_member_cp\": \"103581\", \"most_war_with_guild\": \"・殺戮・\", \"node_won\": \"33\", \"siege_won\": \"58\", \"total_cp\": \"5525763\", \"total_family_cp\": \"29809958\", \"total_node_wars\": \"38\", \"total_siege_wars\": \"82\", \"total_war\": \"40\"}",
+        "created_at": "2026-06-06T12:26:32+00:00"
+      },
+      {
+        "id": 16,
+        "retrieved_at": "2026-06-06 21:44",
+        "guild_name": "RaиkSS",
+        "avg_cp": 112771.0,
+        "total_cp": 5525763,
+        "total_family_cp": 29809958,
+        "active_member_count": 49,
+        "low_member_cp": 103581,
+        "high_member_cp": 136812,
+        "declared_on_other_guild": 28,
+        "declared_by_other_guild": 12,
+        "total_war": 40,
+        "all_time_win_rate": 87.18,
+        "most_war_with_guild": "・殺戮・",
+        "total_node_wars": 38,
+        "node_won": 33,
+        "total_siege_wars": 82,
+        "siege_won": 58,
+        "currently_holding": "T3 Rhutum Outstation",
+        "summary_json": "{\"active_member_count\": \"49\", \"all_time_win_rate\": \"87.18%\", \"avg_cp\": \"112771\", \"currently_holding\": \"T3 Rhutum Outstation\", \"declared_by_other_guild\": \"12\", \"declared_on_other_guild\": \"28\", \"high_member_cp\": \"136812\", \"low_member_cp\": \"103581\", \"most_war_with_guild\": \"・殺戮・\", \"node_won\": \"33\", \"siege_won\": \"58\", \"total_cp\": \"5525763\", \"total_family_cp\": \"29809958\", \"total_node_wars\": \"38\", \"total_siege_wars\": \"82\", \"total_war\": \"40\"}",
+        "created_at": "2026-06-06T12:44:16+00:00"
+      },
+      {
+        "id": 32,
+        "retrieved_at": "2026-06-06 22:35",
+        "guild_name": "Revenant",
+        "avg_cp": 96919.0,
+        "total_cp": 4555210,
+        "total_family_cp": 26757550,
+        "active_member_count": 47,
+        "low_member_cp": 85662,
+        "high_member_cp": 107254,
+        "declared_on_other_guild": 38,
+        "declared_by_other_guild": 109,
+        "total_war": 147,
+        "all_time_win_rate": 28.28,
+        "most_war_with_guild": null,
+        "total_node_wars": 322,
+        "node_won": 203,
+        "total_siege_wars": 13,
+        "siege_won": 0,
+        "currently_holding": "T1 Altinova Entrance",
+        "summary_json": "{\"active_member_count\": \"47\", \"all_time_win_rate\": \"28.28%\", \"avg_cp\": \"96919\", \"currently_holding\": \"T1 Altinova Entrance\", \"declared_by_other_guild\": \"109\", \"declared_on_other_guild\": \"38\", \"high_member_cp\": \"107254\", \"low_member_cp\": \"85662\", \"most_war_with_guild\": \"\", \"node_won\": \"203\", \"siege_won\": \"0\", \"total_cp\": \"4555210\", \"total_family_cp\": \"26757550\", \"total_node_wars\": \"322\", \"total_siege_wars\": \"13\", \"total_war\": \"147\"}",
+        "created_at": "2026-06-06T13:35:38+00:00"
+      },
+      {
+        "id": 38,
+        "retrieved_at": "2026-06-06 23:02",
+        "guild_name": "毛家村",
+        "avg_cp": 92146.0,
+        "total_cp": 4330875,
+        "total_family_cp": 25102778,
+        "active_member_count": 47,
+        "low_member_cp": 81288,
+        "high_member_cp": 114422,
+        "declared_on_other_guild": 1,
+        "declared_by_other_guild": 3,
+        "total_war": 4,
+        "all_time_win_rate": 25.0,
+        "most_war_with_guild": "RaиkSS",
+        "total_node_wars": 40,
+        "node_won": 9,
+        "total_siege_wars": 0,
+        "siege_won": 0,
+        "currently_holding": "None",
+        "summary_json": "{\"active_member_count\": \"47\", \"all_time_win_rate\": \"25.00%\", \"avg_cp\": \"92146\", \"currently_holding\": \"None\", \"declared_by_other_guild\": \"3\", \"declared_on_other_guild\": \"1\", \"high_member_cp\": \"114422\", \"low_member_cp\": \"81288\", \"most_war_with_guild\": \"RaиkSS\", \"node_won\": \"9\", \"siege_won\": \"0\", \"total_cp\": \"4330875\", \"total_family_cp\": \"25102778\", \"total_node_wars\": \"40\", \"total_siege_wars\": \"0\", \"total_war\": \"4\"}",
+        "created_at": "2026-06-06T14:02:37+00:00"
+      }
+    ]
+  },
+  {
+    "name": "import_files",
+    "columns": [
+      "id",
+      "file_path",
+      "file_name",
+      "imported_at"
+    ],
+    "rows": [
+      {
+        "id": 38,
+        "file_path": "data/ーEspoirー/guild_ーEspoirー_2026-06-01.xlsx",
+        "file_name": "guild_ーEspoirー_2026-06-01.xlsx",
+        "imported_at": "2026-06-04 11:39:28"
+      }
+    ]
+  },
+  {
+    "name": "member_snapshots",
+    "columns": [
+      "id",
+      "retrieved_at",
+      "guild_name",
+      "rank_no",
+      "class_name",
+      "family_name",
+      "level",
+      "cpm",
+      "fcp",
+      "created_at",
+      "class_name_raw",
+      "class_name_normalized",
+      "class_name_version"
+    ],
+    "rows": [
+      {
+        "id": 38,
+        "retrieved_at": "2026-05-28 21:49",
+        "guild_name": "AlmaVivaJP",
+        "rank_no": 38,
+        "class_name": "",
+        "family_name": "あっ・ぼたもちモッチ",
+        "level": 145,
+        "cpm": 109844,
+        "fcp": 750012,
+        "created_at": "2026-06-04 11:39:04",
+        "class_name_raw": null,
+        "class_name_normalized": null,
+        "class_name_version": null
+      },
+      {
+        "id": 88,
+        "retrieved_at": "2026-05-29 09:38",
+        "guild_name": "AlmaVivaJP",
+        "rank_no": 38,
+        "class_name": "",
+        "family_name": "あっ・ぼたもちモッチ",
+        "level": 145,
+        "cpm": 110181,
+        "fcp": 754010,
+        "created_at": "2026-06-04 11:39:04",
+        "class_name_raw": null,
+        "class_name_normalized": null,
+        "class_name_version": null
+      },
+      {
+        "id": 138,
+        "retrieved_at": "2026-06-01 09:21",
+        "guild_name": "AlmaVivaJP",
+        "rank_no": 38,
+        "class_name": "",
+        "family_name": "叩き丸",
+        "level": 141,
+        "cpm": 108895,
+        "fcp": 746821,
+        "created_at": "2026-06-04 11:39:04",
+        "class_name_raw": null,
+        "class_name_normalized": null,
+        "class_name_version": null
+      },
+      {
+        "id": 186,
+        "retrieved_at": "2026-05-29 11:32",
+        "guild_name": "Astrklotho",
+        "rank_no": 38,
+        "class_name": "",
+        "family_name": "苺ギフト券",
+        "level": 115,
+        "cpm": 75057,
+        "fcp": 468536,
+        "created_at": "2026-06-04 11:39:04",
+        "class_name_raw": null,
+        "class_name_normalized": null,
+        "class_name_version": null
+      }
+    ]
+  },
+  {
+    "name": "node_history_snapshots",
+    "columns": [
+      "id",
+      "retrieved_at",
+      "guild_name",
+      "row_no",
+      "war_date",
+      "node_name",
+      "opponent_guild",
+      "result",
+      "raw_json",
+      "created_at"
+    ],
+    "rows": [
+      {
+        "id": 38,
+        "retrieved_at": "2026-06-05 10:50",
+        "guild_name": "Myst",
+        "row_no": 8,
+        "war_date": "11 May 2026",
+        "node_name": "T2 Velia Farmlands",
+        "opponent_guild": null,
+        "result": "Win",
+        "raw_json": "{\"node_name\": \"T2 Velia Farmlands\", \"opponent_guild\": \"\", \"raw\": {\"content_name\": \"T2 Velia Farmlands\", \"date\": \"11 May 2026\", \"result\": \"Win\"}, \"result\": \"Win\", \"row_no\": 8, \"war_date\": \"11 May 2026\"}",
+        "created_at": "2026-06-05T01:50:49+00:00"
+      }
+    ]
+  }
+]
+
+## PVカルテ由来の推移情報
+{
+  "record_count": 0,
+  "latest_rows": [],
+  "growth_top": [],
+  "stagnant_or_decline": []
+}
+
+## ギルドファイル由来の情報
+[]
+
+## AIへの作文指示
+- 上記の材料だけを使って、このギルド専用の自然な日本語コメントを作成してください。
+- 数字が不足している項目は断定せず、情報不足として扱ってください。
+- 良い点、注意点、次に見るべき点が分かる文章にしてください。
+- 出力は指定されたJSON形式だけにしてください。

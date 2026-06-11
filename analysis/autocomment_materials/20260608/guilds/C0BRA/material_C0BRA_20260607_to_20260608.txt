@@ -1,0 +1,201 @@
+# ギルド別AutoComment AI作文材料
+ギルド名: C0BRA
+対象期間: 2026-06-07 → 2026-06-08
+
+## 材料不足・注意
+- summary由来のギルド集計情報が不足しています。
+- PVカルテ由来の個人推移情報が不足しています。
+
+## 主要指標
+- 人数: None
+- 平均CPM: None
+- 総CPM: None
+- 順位: None
+
+## 前回との差分
+- 差分を計算できる前回データが不足しています。
+
+## メンバー変化
+- 完全一致人数: None
+- 新規加入者: []
+- 追跡不明者: []
+- 名前変更者: []
+- 移籍者: []
+
+## CPM伸び上位
+- 該当データなし
+
+## 停滞・減少情報
+- 目立つ停滞・減少データなし
+
+## summary由来の情報
+[]
+
+## SQLite由来の情報
+[
+  {
+    "name": "guild_snapshots",
+    "columns": [
+      "id",
+      "retrieved_at",
+      "guild_name",
+      "member_count",
+      "avg_cpm",
+      "total_cpm",
+      "created_at"
+    ],
+    "rows": [
+      {
+        "id": 5,
+        "retrieved_at": "2026-05-29 11:57",
+        "guild_name": "C0BRA",
+        "member_count": 50,
+        "avg_cpm": 92032,
+        "total_cpm": 4601610,
+        "created_at": "2026-06-04 11:39:05"
+      }
+    ]
+  },
+  {
+    "name": "member_snapshots",
+    "columns": [
+      "id",
+      "retrieved_at",
+      "guild_name",
+      "rank_no",
+      "class_name",
+      "family_name",
+      "level",
+      "cpm",
+      "fcp",
+      "created_at",
+      "class_name_raw",
+      "class_name_normalized",
+      "class_name_version"
+    ],
+    "rows": [
+      {
+        "id": 194,
+        "retrieved_at": "2026-05-29 11:57",
+        "guild_name": "C0BRA",
+        "rank_no": 1,
+        "class_name": "",
+        "family_name": "乄爪чтH神話",
+        "level": 133,
+        "cpm": 101240,
+        "fcp": 500694,
+        "created_at": "2026-06-04 11:39:05",
+        "class_name_raw": null,
+        "class_name_normalized": null,
+        "class_name_version": null
+      },
+      {
+        "id": 195,
+        "retrieved_at": "2026-05-29 11:57",
+        "guild_name": "C0BRA",
+        "rank_no": 2,
+        "class_name": "",
+        "family_name": "NezukoFOWL",
+        "level": 128,
+        "cpm": 100767,
+        "fcp": 602946,
+        "created_at": "2026-06-04 11:39:05",
+        "class_name_raw": null,
+        "class_name_normalized": null,
+        "class_name_version": null
+      },
+      {
+        "id": 196,
+        "retrieved_at": "2026-05-29 11:57",
+        "guild_name": "C0BRA",
+        "rank_no": 3,
+        "class_name": "",
+        "family_name": "Lötkööl",
+        "level": 130,
+        "cpm": 100062,
+        "fcp": 593243,
+        "created_at": "2026-06-04 11:39:05",
+        "class_name_raw": null,
+        "class_name_normalized": null,
+        "class_name_version": null
+      },
+      {
+        "id": 197,
+        "retrieved_at": "2026-05-29 11:57",
+        "guild_name": "C0BRA",
+        "rank_no": 4,
+        "class_name": "",
+        "family_name": "かげーYveltalサン",
+        "level": 131,
+        "cpm": 99439,
+        "fcp": 605295,
+        "created_at": "2026-06-04 11:39:05",
+        "class_name_raw": null,
+        "class_name_normalized": null,
+        "class_name_version": null
+      },
+      {
+        "id": 198,
+        "retrieved_at": "2026-05-29 11:57",
+        "guild_name": "C0BRA",
+        "rank_no": 5,
+        "class_name": "",
+        "family_name": "ALC个DES",
+        "level": 125,
+        "cpm": 99048,
+        "fcp": 291555,
+        "created_at": "2026-06-04 11:39:05",
+        "class_name_raw": null,
+        "class_name_normalized": null,
+        "class_name_version": null
+      },
+      {
+        "id": 199,
+        "retrieved_at": "2026-05-29 11:57",
+        "guild_name": "C0BRA",
+        "rank_no": 6,
+        "class_name": "",
+        "family_name": "가르시아페레르",
+        "level": 131,
+        "cpm": 99005,
+        "fcp": 0,
+        "created_at": "2026-06-04 11:39:05",
+        "class_name_raw": null,
+        "class_name_normalized": null,
+        "class_name_version": null
+      },
+      {
+        "id": 200,
+        "retrieved_at": "2026-05-29 11:57",
+        "guild_name": "C0BRA",
+        "rank_no": 7,
+        "class_name": "",
+        "family_name": "OtenThickoL",
+        "level": 128,
+        "cpm": 98516,
+        "fcp": 0,
+        "created_at": "2026-06-04 11:39:05",
+        "class_name_raw": null,
+        "class_name_normalized": null,
+        "class_name_version": null
+      }
+    ]
+  }
+]
+
+## PVカルテ由来の推移情報
+{
+  "record_count": 0,
+  "latest_rows": [],
+  "growth_top": [],
+  "stagnant_or_decline": []
+}
+
+## ギルドファイル由来の情報
+[]
+
+## AIへの作文指示
+- 上記の材料だけを使って、このギルド専用の自然な日本語コメントを作成してください。
+- 数字が不足している項目は断定せず、情報不足として扱ってください。
+- 良い点、注意点、次に見るべき点が分かる文章にしてください。
+- 出力は指定されたJSON形式だけにしてください。

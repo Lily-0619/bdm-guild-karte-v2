@@ -1,0 +1,13 @@
+{
+  "old_date": "2026-06-07",
+  "new_date": "2026-06-08",
+  "guild_name": "RaиkSS",
+  "provider": "ollama",
+  "model": null,
+  "comment": null,
+  "errors": [
+    "--skip-ai またはAI設定エラーのため、Ollama生成は実行していません。"
+  ],
+  "material_txt": "D:\\bdm-guild-karte\\analysis\\autocomment_materials\\20260608\\guilds\\RaиkSS\\material_RaиkSS_20260607_to_20260608.txt",
+  "material_json": "D:\\bdm-guild-karte\\analysis\\autocomment_materials\\20260608\\guilds\\RaиkSS\\material_RaиkSS_20260607_to_20260608.json"
+}

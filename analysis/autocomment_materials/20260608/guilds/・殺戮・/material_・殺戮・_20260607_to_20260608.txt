@@ -1,0 +1,600 @@
+# ギルド別AutoComment AI作文材料
+ギルド名: ・殺戮・
+対象期間: 2026-06-07 → 2026-06-08
+
+## 材料不足・注意
+- summary由来のギルド集計情報が不足しています。
+- PVカルテ由来の個人推移情報が不足しています。
+
+## 主要指標
+- 人数: None
+- 平均CPM: None
+- 総CPM: None
+- 順位: None
+
+## 前回との差分
+- 差分を計算できる前回データが不足しています。
+
+## メンバー変化
+- 完全一致人数: None
+- 新規加入者: []
+- 追跡不明者: []
+- 名前変更者: []
+- 移籍者: []
+
+## CPM伸び上位
+- 該当データなし
+
+## 停滞・減少情報
+- 目立つ停滞・減少データなし
+
+## summary由来の情報
+[]
+
+## SQLite由来の情報
+[
+  {
+    "name": "guild_snapshots",
+    "columns": [
+      "id",
+      "retrieved_at",
+      "guild_name",
+      "member_count",
+      "avg_cpm",
+      "total_cpm",
+      "created_at"
+    ],
+    "rows": [
+      {
+        "id": 36,
+        "retrieved_at": "2026-05-28 21:52",
+        "guild_name": "・殺戮・",
+        "member_count": 48,
+        "avg_cpm": 111712,
+        "total_cpm": 5362198,
+        "created_at": "2026-06-04 11:39:28"
+      },
+      {
+        "id": 37,
+        "retrieved_at": "2026-05-29 09:41",
+        "guild_name": "・殺戮・",
+        "member_count": 48,
+        "avg_cpm": 111726,
+        "total_cpm": 5362856,
+        "created_at": "2026-06-04 11:39:28"
+      },
+      {
+        "id": 66,
+        "retrieved_at": "2026-06-06 21:19",
+        "guild_name": "・殺戮・",
+        "member_count": 48,
+        "avg_cpm": 112438.95833333333,
+        "total_cpm": 5397070,
+        "created_at": "2026-06-06T12:19:58+00:00"
+      },
+      {
+        "id": 73,
+        "retrieved_at": "2026-06-06 21:39",
+        "guild_name": "・殺戮・",
+        "member_count": 48,
+        "avg_cpm": 112438.95833333333,
+        "total_cpm": 5397070,
+        "created_at": "2026-06-06T12:39:10+00:00"
+      }
+    ]
+  },
+  {
+    "name": "guild_summary_snapshots",
+    "columns": [
+      "id",
+      "retrieved_at",
+      "guild_name",
+      "avg_cp",
+      "total_cp",
+      "total_family_cp",
+      "active_member_count",
+      "low_member_cp",
+      "high_member_cp",
+      "declared_on_other_guild",
+      "declared_by_other_guild",
+      "total_war",
+      "all_time_win_rate",
+      "most_war_with_guild",
+      "total_node_wars",
+      "node_won",
+      "total_siege_wars",
+      "siege_won",
+      "currently_holding",
+      "summary_json",
+      "created_at"
+    ],
+    "rows": [
+      {
+        "id": 6,
+        "retrieved_at": "2026-06-06 21:19",
+        "guild_name": "・殺戮・",
+        "avg_cp": 112389.0,
+        "total_cp": 5394685,
+        "total_family_cp": 34787933,
+        "active_member_count": 48,
+        "low_member_cp": 52310,
+        "high_member_cp": 136669,
+        "declared_on_other_guild": 3,
+        "declared_by_other_guild": 11,
+        "total_war": 14,
+        "all_time_win_rate": 0.0,
+        "most_war_with_guild": "RaиkSS",
+        "total_node_wars": 91,
+        "node_won": 41,
+        "total_siege_wars": 3,
+        "siege_won": 0,
+        "currently_holding": "T3 Altar of Agris",
+        "summary_json": "{\"active_member_count\": \"48\", \"all_time_win_rate\": \"0.00%\", \"avg_cp\": \"112389\", \"currently_holding\": \"T3 Altar of Agris\", \"declared_by_other_guild\": \"11\", \"declared_on_other_guild\": \"3\", \"high_member_cp\": \"136669\", \"low_member_cp\": \"52310\", \"most_war_with_guild\": \"RaиkSS\", \"node_won\": \"41\", \"siege_won\": \"0\", \"total_cp\": \"5394685\", \"total_family_cp\": \"34787933\", \"total_node_wars\": \"91\", \"total_siege_wars\": \"3\", \"total_war\": \"14\"}",
+        "created_at": "2026-06-06T12:19:58+00:00"
+      },
+      {
+        "id": 9,
+        "retrieved_at": "2026-06-06 21:26",
+        "guild_name": "RaиkSS",
+        "avg_cp": 112771.0,
+        "total_cp": 5525763,
+        "total_family_cp": 29809958,
+        "active_member_count": 49,
+        "low_member_cp": 103581,
+        "high_member_cp": 136812,
+        "declared_on_other_guild": 28,
+        "declared_by_other_guild": 12,
+        "total_war": 40,
+        "all_time_win_rate": 87.18,
+        "most_war_with_guild": "・殺戮・",
+        "total_node_wars": 38,
+        "node_won": 33,
+        "total_siege_wars": 82,
+        "siege_won": 58,
+        "currently_holding": "T3 Rhutum Outstation",
+        "summary_json": "{\"active_member_count\": \"49\", \"all_time_win_rate\": \"87.18%\", \"avg_cp\": \"112771\", \"currently_holding\": \"T3 Rhutum Outstation\", \"declared_by_other_guild\": \"12\", \"declared_on_other_guild\": \"28\", \"high_member_cp\": \"136812\", \"low_member_cp\": \"103581\", \"most_war_with_guild\": \"・殺戮・\", \"node_won\": \"33\", \"siege_won\": \"58\", \"total_cp\": \"5525763\", \"total_family_cp\": \"29809958\", \"total_node_wars\": \"38\", \"total_siege_wars\": \"82\", \"total_war\": \"40\"}",
+        "created_at": "2026-06-06T12:26:32+00:00"
+      },
+      {
+        "id": 13,
+        "retrieved_at": "2026-06-06 21:39",
+        "guild_name": "・殺戮・",
+        "avg_cp": 112389.0,
+        "total_cp": 5394685,
+        "total_family_cp": 34787933,
+        "active_member_count": 48,
+        "low_member_cp": 52310,
+        "high_member_cp": 136669,
+        "declared_on_other_guild": 3,
+        "declared_by_other_guild": 11,
+        "total_war": 14,
+        "all_time_win_rate": 0.0,
+        "most_war_with_guild": "RaиkSS",
+        "total_node_wars": 91,
+        "node_won": 41,
+        "total_siege_wars": 3,
+        "siege_won": 0,
+        "currently_holding": "T3 Altar of Agris",
+        "summary_json": "{\"active_member_count\": \"48\", \"all_time_win_rate\": \"0.00%\", \"avg_cp\": \"112389\", \"currently_holding\": \"T3 Altar of Agris\", \"declared_by_other_guild\": \"11\", \"declared_on_other_guild\": \"3\", \"high_member_cp\": \"136669\", \"low_member_cp\": \"52310\", \"most_war_with_guild\": \"RaиkSS\", \"node_won\": \"41\", \"siege_won\": \"0\", \"total_cp\": \"5394685\", \"total_family_cp\": \"34787933\", \"total_node_wars\": \"91\", \"total_siege_wars\": \"3\", \"total_war\": \"14\"}",
+        "created_at": "2026-06-06T12:39:10+00:00"
+      },
+      {
+        "id": 16,
+        "retrieved_at": "2026-06-06 21:44",
+        "guild_name": "RaиkSS",
+        "avg_cp": 112771.0,
+        "total_cp": 5525763,
+        "total_family_cp": 29809958,
+        "active_member_count": 49,
+        "low_member_cp": 103581,
+        "high_member_cp": 136812,
+        "declared_on_other_guild": 28,
+        "declared_by_other_guild": 12,
+        "total_war": 40,
+        "all_time_win_rate": 87.18,
+        "most_war_with_guild": "・殺戮・",
+        "total_node_wars": 38,
+        "node_won": 33,
+        "total_siege_wars": 82,
+        "siege_won": 58,
+        "currently_holding": "T3 Rhutum Outstation",
+        "summary_json": "{\"active_member_count\": \"49\", \"all_time_win_rate\": \"87.18%\", \"avg_cp\": \"112771\", \"currently_holding\": \"T3 Rhutum Outstation\", \"declared_by_other_guild\": \"12\", \"declared_on_other_guild\": \"28\", \"high_member_cp\": \"136812\", \"low_member_cp\": \"103581\", \"most_war_with_guild\": \"・殺戮・\", \"node_won\": \"33\", \"siege_won\": \"58\", \"total_cp\": \"5525763\", \"total_family_cp\": \"29809958\", \"total_node_wars\": \"38\", \"total_siege_wars\": \"82\", \"total_war\": \"40\"}",
+        "created_at": "2026-06-06T12:44:16+00:00"
+      }
+    ]
+  },
+  {
+    "name": "node_history_snapshots",
+    "columns": [
+      "id",
+      "retrieved_at",
+      "guild_name",
+      "row_no",
+      "war_date",
+      "node_name",
+      "opponent_guild",
+      "result",
+      "raw_json",
+      "created_at"
+    ],
+    "rows": [
+      {
+        "id": 149,
+        "retrieved_at": "2026-06-06 21:19",
+        "guild_name": "・殺戮・",
+        "row_no": 1,
+        "war_date": "05 Jun 2026",
+        "node_name": "T3 Altar of Agris",
+        "opponent_guild": null,
+        "result": "Win",
+        "raw_json": "{\"node_name\": \"T3 Altar of Agris\", \"opponent_guild\": \"\", \"raw\": {\"content_name\": \"T3 Altar of Agris\", \"date\": \"05 Jun 2026\", \"result\": \"Win\"}, \"result\": \"Win\", \"row_no\": 1, \"war_date\": \"05 Jun 2026\"}",
+        "created_at": "2026-06-06T12:19:58+00:00"
+      },
+      {
+        "id": 150,
+        "retrieved_at": "2026-06-06 21:19",
+        "guild_name": "・殺戮・",
+        "row_no": 2,
+        "war_date": "01 Jun 2026",
+        "node_name": "T3 Ahto Farm",
+        "opponent_guild": null,
+        "result": "Lost",
+        "raw_json": "{\"node_name\": \"T3 Ahto Farm\", \"opponent_guild\": \"\", \"raw\": {\"content_name\": \"T3 Ahto Farm\", \"date\": \"01 Jun 2026\", \"result\": \"Lost\"}, \"result\": \"Lost\", \"row_no\": 2, \"war_date\": \"01 Jun 2026\"}",
+        "created_at": "2026-06-06T12:19:58+00:00"
+      },
+      {
+        "id": 151,
+        "retrieved_at": "2026-06-06 21:19",
+        "guild_name": "・殺戮・",
+        "row_no": 3,
+        "war_date": "31 May 2026",
+        "node_name": "T3 Dernyl Farm",
+        "opponent_guild": null,
+        "result": "Lost",
+        "raw_json": "{\"node_name\": \"T3 Dernyl Farm\", \"opponent_guild\": \"\", \"raw\": {\"content_name\": \"T3 Dernyl Farm\", \"date\": \"31 May 2026\", \"result\": \"Lost\"}, \"result\": \"Lost\", \"row_no\": 3, \"war_date\": \"31 May 2026\"}",
+        "created_at": "2026-06-06T12:19:58+00:00"
+      },
+      {
+        "id": 152,
+        "retrieved_at": "2026-06-06 21:19",
+        "guild_name": "・殺戮・",
+        "row_no": 4,
+        "war_date": "29 May 2026",
+        "node_name": "T3 Altar of Agris",
+        "opponent_guild": null,
+        "result": "Win",
+        "raw_json": "{\"node_name\": \"T3 Altar of Agris\", \"opponent_guild\": \"\", \"raw\": {\"content_name\": \"T3 Altar of Agris\", \"date\": \"29 May 2026\", \"result\": \"Win\"}, \"result\": \"Win\", \"row_no\": 4, \"war_date\": \"29 May 2026\"}",
+        "created_at": "2026-06-06T12:19:58+00:00"
+      },
+      {
+        "id": 153,
+        "retrieved_at": "2026-06-06 21:19",
+        "guild_name": "・殺戮・",
+        "row_no": 5,
+        "war_date": "25 May 2026",
+        "node_name": "T3 Ahto Farm",
+        "opponent_guild": null,
+        "result": "Lost",
+        "raw_json": "{\"node_name\": \"T3 Ahto Farm\", \"opponent_guild\": \"\", \"raw\": {\"content_name\": \"T3 Ahto Farm\", \"date\": \"25 May 2026\", \"result\": \"Lost\"}, \"result\": \"Lost\", \"row_no\": 5, \"war_date\": \"25 May 2026\"}",
+        "created_at": "2026-06-06T12:19:58+00:00"
+      },
+      {
+        "id": 154,
+        "retrieved_at": "2026-06-06 21:19",
+        "guild_name": "・殺戮・",
+        "row_no": 6,
+        "war_date": "24 May 2026",
+        "node_name": "T3 Dernyl Farm",
+        "opponent_guild": null,
+        "result": "Lost",
+        "raw_json": "{\"node_name\": \"T3 Dernyl Farm\", \"opponent_guild\": \"\", \"raw\": {\"content_name\": \"T3 Dernyl Farm\", \"date\": \"24 May 2026\", \"result\": \"Lost\"}, \"result\": \"Lost\", \"row_no\": 6, \"war_date\": \"24 May 2026\"}",
+        "created_at": "2026-06-06T12:19:58+00:00"
+      },
+      {
+        "id": 155,
+        "retrieved_at": "2026-06-06 21:19",
+        "guild_name": "・殺戮・",
+        "row_no": 7,
+        "war_date": "22 May 2026",
+        "node_name": "T3 Altar of Agris",
+        "opponent_guild": null,
+        "result": "Win",
+        "raw_json": "{\"node_name\": \"T3 Altar of Agris\", \"opponent_guild\": \"\", \"raw\": {\"content_name\": \"T3 Altar of Agris\", \"date\": \"22 May 2026\", \"result\": \"Win\"}, \"result\": \"Win\", \"row_no\": 7, \"war_date\": \"22 May 2026\"}",
+        "created_at": "2026-06-06T12:19:58+00:00"
+      },
+      {
+        "id": 156,
+        "retrieved_at": "2026-06-06 21:19",
+        "guild_name": "・殺戮・",
+        "row_no": 8,
+        "war_date": "18 May 2026",
+        "node_name": "T3 Ahto Farm",
+        "opponent_guild": null,
+        "result": "Lost",
+        "raw_json": "{\"node_name\": \"T3 Ahto Farm\", \"opponent_guild\": \"\", \"raw\": {\"content_name\": \"T3 Ahto Farm\", \"date\": \"18 May 2026\", \"result\": \"Lost\"}, \"result\": \"Lost\", \"row_no\": 8, \"war_date\": \"18 May 2026\"}",
+        "created_at": "2026-06-06T12:19:58+00:00"
+      },
+      {
+        "id": 157,
+        "retrieved_at": "2026-06-06 21:19",
+        "guild_name": "・殺戮・",
+        "row_no": 9,
+        "war_date": "17 May 2026",
+        "node_name": "T3 Dernyl Farm",
+        "opponent_guild": null,
+        "result": "Lost",
+        "raw_json": "{\"node_name\": \"T3 Dernyl Farm\", \"opponent_guild\": \"\", \"raw\": {\"content_name\": \"T3 Dernyl Farm\", \"date\": \"17 May 2026\", \"result\": \"Lost\"}, \"result\": \"Lost\", \"row_no\": 9, \"war_date\": \"17 May 2026\"}",
+        "created_at": "2026-06-06T12:19:58+00:00"
+      },
+      {
+        "id": 158,
+        "retrieved_at": "2026-06-06 21:19",
+        "guild_name": "・殺戮・",
+        "row_no": 10,
+        "war_date": "15 May 2026",
+        "node_name": "T3 Altar of Agris",
+        "opponent_guild": null,
+        "result": "Win",
+        "raw_json": "{\"node_name\": \"T3 Altar of Agris\", \"opponent_guild\": \"\", \"raw\": {\"content_name\": \"T3 Altar of Agris\", \"date\": \"15 May 2026\", \"result\": \"Win\"}, \"result\": \"Win\", \"row_no\": 10, \"war_date\": \"15 May 2026\"}",
+        "created_at": "2026-06-06T12:19:58+00:00"
+      },
+      {
+        "id": 159,
+        "retrieved_at": "2026-06-06 21:19",
+        "guild_name": "・殺戮・",
+        "row_no": 11,
+        "war_date": "11 May 2026",
+        "node_name": "T3 Ahto Farm",
+        "opponent_guild": null,
+        "result": "Lost",
+        "raw_json": "{\"node_name\": \"T3 Ahto Farm\", \"opponent_guild\": \"\", \"raw\": {\"content_name\": \"T3 Ahto Farm\", \"date\": \"11 May 2026\", \"result\": \"Lost\"}, \"result\": \"Lost\", \"row_no\": 11, \"war_date\": \"11 May 2026\"}",
+        "created_at": "2026-06-06T12:19:58+00:00"
+      },
+      {
+        "id": 160,
+        "retrieved_at": "2026-06-06 21:19",
+        "guild_name": "・殺戮・",
+        "row_no": 12,
+        "war_date": "10 May 2026",
+        "node_name": "T3 Dernyl Farm",
+        "opponent_guild": null,
+        "result": "Lost",
+        "raw_json": "{\"node_name\": \"T3 Dernyl Farm\", \"opponent_guild\": \"\", \"raw\": {\"content_name\": \"T3 Dernyl Farm\", \"date\": \"10 May 2026\", \"result\": \"Lost\"}, \"result\": \"Lost\", \"row_no\": 12, \"war_date\": \"10 May 2026\"}",
+        "created_at": "2026-06-06T12:19:58+00:00"
+      },
+      {
+        "id": 161,
+        "retrieved_at": "2026-06-06 21:19",
+        "guild_name": "・殺戮・",
+        "row_no": 13,
+        "war_date": "08 May 2026",
+        "node_name": "T3 Altar of Agris",
+        "opponent_guild": null,
+        "result": "Win",
+        "raw_json": "{\"node_name\": \"T3 Altar of Agris\", \"opponent_guild\": \"\", \"raw\": {\"content_name\": \"T3 Altar of Agris\", \"date\": \"08 May 2026\", \"result\": \"Win\"}, \"result\": \"Win\", \"row_no\": 13, \"war_date\": \"08 May 2026\"}",
+        "created_at": "2026-06-06T12:19:58+00:00"
+      },
+      {
+        "id": 162,
+        "retrieved_at": "2026-06-06 21:19",
+        "guild_name": "・殺戮・",
+        "row_no": 14,
+        "war_date": "04 May 2026",
+        "node_name": "T3 Ahto Farm",
+        "opponent_guild": null,
+        "result": "Lost",
+        "raw_json": "{\"node_name\": \"T3 Ahto Farm\", \"opponent_guild\": \"\", \"raw\": {\"content_name\": \"T3 Ahto Farm\", \"date\": \"04 May 2026\", \"result\": \"Lost\"}, \"result\": \"Lost\", \"row_no\": 14, \"war_date\": \"04 May 2026\"}",
+        "created_at": "2026-06-06T12:19:58+00:00"
+      },
+      {
+        "id": 163,
+        "retrieved_at": "2026-06-06 21:19",
+        "guild_name": "・殺戮・",
+        "row_no": 15,
+        "war_date": "03 May 2026",
+        "node_name": "T3 Dernyl Farm",
+        "opponent_guild": null,
+        "result": "Lost",
+        "raw_json": "{\"node_name\": \"T3 Dernyl Farm\", \"opponent_guild\": \"\", \"raw\": {\"content_name\": \"T3 Dernyl Farm\", \"date\": \"03 May 2026\", \"result\": \"Lost\"}, \"result\": \"Lost\", \"row_no\": 15, \"war_date\": \"03 May 2026\"}",
+        "created_at": "2026-06-06T12:19:58+00:00"
+      },
+      {
+        "id": 164,
+        "retrieved_at": "2026-06-06 21:19",
+        "guild_name": "・殺戮・",
+        "row_no": 16,
+        "war_date": "02 May 2026",
+        "node_name": "SW Calpheon Siege War",
+        "opponent_guild": null,
+        "result": "Lost",
+        "raw_json": "{\"node_name\": \"SW Calpheon Siege War\", \"opponent_guild\": \"\", \"raw\": {\"content_name\": \"SW Calpheon Siege War\", \"date\": \"02 May 2026\", \"result\": \"Lost\"}, \"result\": \"Lost\", \"row_no\": 16, \"war_date\": \"02 May 2026\"}",
+        "created_at": "2026-06-06T12:19:58+00:00"
+      },
+      {
+        "id": 165,
+        "retrieved_at": "2026-06-06 21:19",
+        "guild_name": "・殺戮・",
+        "row_no": 17,
+        "war_date": "01 May 2026",
+        "node_name": "T3 Altar of Agris",
+        "opponent_guild": null,
+        "result": "Win",
+        "raw_json": "{\"node_name\": \"T3 Altar of Agris\", \"opponent_guild\": \"\", \"raw\": {\"content_name\": \"T3 Altar of Agris\", \"date\": \"01 May 2026\", \"result\": \"Win\"}, \"result\": \"Win\", \"row_no\": 17, \"war_date\": \"01 May 2026\"}",
+        "created_at": "2026-06-06T12:19:58+00:00"
+      },
+      {
+        "id": 166,
+        "retrieved_at": "2026-06-06 21:19",
+        "guild_name": "・殺戮・",
+        "row_no": 18,
+        "war_date": "27 Apr 2026",
+        "node_name": "T3 Ahto Farm",
+        "opponent_guild": null,
+        "result": "Lost",
+        "raw_json": "{\"node_name\": \"T3 Ahto Farm\", \"opponent_guild\": \"\", \"raw\": {\"content_name\": \"T3 Ahto Farm\", \"date\": \"27 Apr 2026\", \"result\": \"Lost\"}, \"result\": \"Lost\", \"row_no\": 18, \"war_date\": \"27 Apr 2026\"}",
+        "created_at": "2026-06-06T12:19:58+00:00"
+      },
+      {
+        "id": 167,
+        "retrieved_at": "2026-06-06 21:19",
+        "guild_name": "・殺戮・",
+        "row_no": 19,
+        "war_date": "26 Apr 2026",
+        "node_name": "T3 Dernyl Farm",
+        "opponent_guild": null,
+        "result": "Lost",
+        "raw_json": "{\"node_name\": \"T3 Dernyl Farm\", \"opponent_guild\": \"\", \"raw\": {\"content_name\": \"T3 Dernyl Farm\", \"date\": \"26 Apr 2026\", \"result\": \"Lost\"}, \"result\": \"Lost\", \"row_no\": 19, \"war_date\": \"26 Apr 2026\"}",
+        "created_at": "2026-06-06T12:19:58+00:00"
+      },
+      {
+        "id": 168,
+        "retrieved_at": "2026-06-06 21:19",
+        "guild_name": "・殺戮・",
+        "row_no": 20,
+        "war_date": "24 Apr 2026",
+        "node_name": "T3 Altar of Agris",
+        "opponent_guild": null,
+        "result": "Win",
+        "raw_json": "{\"node_name\": \"T3 Altar of Agris\", \"opponent_guild\": \"\", \"raw\": {\"content_name\": \"T3 Altar of Agris\", \"date\": \"24 Apr 2026\", \"result\": \"Win\"}, \"result\": \"Win\", \"row_no\": 20, \"war_date\": \"24 Apr 2026\"}",
+        "created_at": "2026-06-06T12:19:58+00:00"
+      },
+      {
+        "id": 169,
+        "retrieved_at": "2026-06-06 21:19",
+        "guild_name": "・殺戮・",
+        "row_no": 21,
+        "war_date": "20 Apr 2026",
+        "node_name": "T3 Ahto Farm",
+        "opponent_guild": null,
+        "result": "Lost",
+        "raw_json": "{\"node_name\": \"T3 Ahto Farm\", \"opponent_guild\": \"\", \"raw\": {\"content_name\": \"T3 Ahto Farm\", \"date\": \"20 Apr 2026\", \"result\": \"Lost\"}, \"result\": \"Lost\", \"row_no\": 21, \"war_date\": \"20 Apr 2026\"}",
+        "created_at": "2026-06-06T12:19:58+00:00"
+      },
+      {
+        "id": 170,
+        "retrieved_at": "2026-06-06 21:19",
+        "guild_name": "・殺戮・",
+        "row_no": 22,
+        "war_date": "19 Apr 2026",
+        "node_name": "T3 Dernyl Farm",
+        "opponent_guild": null,
+        "result": "Lost",
+        "raw_json": "{\"node_name\": \"T3 Dernyl Farm\", \"opponent_guild\": \"\", \"raw\": {\"content_name\": \"T3 Dernyl Farm\", \"date\": \"19 Apr 2026\", \"result\": \"Lost\"}, \"result\": \"Lost\", \"row_no\": 22, \"war_date\": \"19 Apr 2026\"}",
+        "created_at": "2026-06-06T12:19:58+00:00"
+      },
+      {
+        "id": 171,
+        "retrieved_at": "2026-06-06 21:19",
+        "guild_name": "・殺戮・",
+        "row_no": 23,
+        "war_date": "17 Apr 2026",
+        "node_name": "T3 Altar of Agris",
+        "opponent_guild": null,
+        "result": "Win",
+        "raw_json": "{\"node_name\": \"T3 Altar of Agris\", \"opponent_guild\": \"\", \"raw\": {\"content_name\": \"T3 Altar of Agris\", \"date\": \"17 Apr 2026\", \"result\": \"Win\"}, \"result\": \"Win\", \"row_no\": 23, \"war_date\": \"17 Apr 2026\"}",
+        "created_at": "2026-06-06T12:19:58+00:00"
+      },
+      {
+        "id": 172,
+        "retrieved_at": "2026-06-06 21:19",
+        "guild_name": "・殺戮・",
+        "row_no": 24,
+        "war_date": "13 Apr 2026",
+        "node_name": "T3 Ahto Farm",
+        "opponent_guild": null,
+        "result": "Lost",
+        "raw_json": "{\"node_name\": \"T3 Ahto Farm\", \"opponent_guild\": \"\", \"raw\": {\"content_name\": \"T3 Ahto Farm\", \"date\": \"13 Apr 2026\", \"result\": \"Lost\"}, \"result\": \"Lost\", \"row_no\": 24, \"war_date\": \"13 Apr 2026\"}",
+        "created_at": "2026-06-06T12:19:58+00:00"
+      },
+      {
+        "id": 173,
+        "retrieved_at": "2026-06-06 21:19",
+        "guild_name": "・殺戮・",
+        "row_no": 25,
+        "war_date": "12 Apr 2026",
+        "node_name": "T3 Dernyl Farm",
+        "opponent_guild": null,
+        "result": "Lost",
+        "raw_json": "{\"node_name\": \"T3 Dernyl Farm\", \"opponent_guild\": \"\", \"raw\": {\"content_name\": \"T3 Dernyl Farm\", \"date\": \"12 Apr 2026\", \"result\": \"Lost\"}, \"result\": \"Lost\", \"row_no\": 25, \"war_date\": \"12 Apr 2026\"}",
+        "created_at": "2026-06-06T12:19:58+00:00"
+      },
+      {
+        "id": 174,
+        "retrieved_at": "2026-06-06 21:19",
+        "guild_name": "・殺戮・",
+        "row_no": 26,
+        "war_date": "10 Apr 2026",
+        "node_name": "T3 Altar of Agris",
+        "opponent_guild": null,
+        "result": "Win",
+        "raw_json": "{\"node_name\": \"T3 Altar of Agris\", \"opponent_guild\": \"\", \"raw\": {\"content_name\": \"T3 Altar of Agris\", \"date\": \"10 Apr 2026\", \"result\": \"Win\"}, \"result\": \"Win\", \"row_no\": 26, \"war_date\": \"10 Apr 2026\"}",
+        "created_at": "2026-06-06T12:19:58+00:00"
+      },
+      {
+        "id": 175,
+        "retrieved_at": "2026-06-06 21:19",
+        "guild_name": "・殺戮・",
+        "row_no": 27,
+        "war_date": "06 Apr 2026",
+        "node_name": "T3 Ahto Farm",
+        "opponent_guild": null,
+        "result": "Lost",
+        "raw_json": "{\"node_name\": \"T3 Ahto Farm\", \"opponent_guild\": \"\", \"raw\": {\"content_name\": \"T3 Ahto Farm\", \"date\": \"06 Apr 2026\", \"result\": \"Lost\"}, \"result\": \"Lost\", \"row_no\": 27, \"war_date\": \"06 Apr 2026\"}",
+        "created_at": "2026-06-06T12:19:58+00:00"
+      },
+      {
+        "id": 176,
+        "retrieved_at": "2026-06-06 21:19",
+        "guild_name": "・殺戮・",
+        "row_no": 28,
+        "war_date": "05 Apr 2026",
+        "node_name": "T3 Dernyl Farm",
+        "opponent_guild": null,
+        "result": "Lost",
+        "raw_json": "{\"node_name\": \"T3 Dernyl Farm\", \"opponent_guild\": \"\", \"raw\": {\"content_name\": \"T3 Dernyl Farm\", \"date\": \"05 Apr 2026\", \"result\": \"Lost\"}, \"result\": \"Lost\", \"row_no\": 28, \"war_date\": \"05 Apr 2026\"}",
+        "created_at": "2026-06-06T12:19:58+00:00"
+      },
+      {
+        "id": 177,
+        "retrieved_at": "2026-06-06 21:19",
+        "guild_name": "・殺戮・",
+        "row_no": 29,
+        "war_date": "03 Apr 2026",
+        "node_name": "T3 Altar of Agris",
+        "opponent_guild": null,
+        "result": "Win",
+        "raw_json": "{\"node_name\": \"T3 Altar of Agris\", \"opponent_guild\": \"\", \"raw\": {\"content_name\": \"T3 Altar of Agris\", \"date\": \"03 Apr 2026\", \"result\": \"Win\"}, \"result\": \"Win\", \"row_no\": 29, \"war_date\": \"03 Apr 2026\"}",
+        "created_at": "2026-06-06T12:19:58+00:00"
+      },
+      {
+        "id": 178,
+        "retrieved_at": "2026-06-06 21:19",
+        "guild_name": "・殺戮・",
+        "row_no": 30,
+        "war_date": "30 Mar 2026",
+        "node_name": "T3 Ahto Farm",
+        "opponent_guild": null,
+        "result": "Lost",
+        "raw_json": "{\"node_name\": \"T3 Ahto Farm\", \"opponent_guild\": \"\", \"raw\": {\"content_name\": \"T3 Ahto Farm\", \"date\": \"30 Mar 2026\", \"result\": \"Lost\"}, \"result\": \"Lost\", \"row_no\": 30, \"war_date\": \"30 Mar 2026\"}",
+        "created_at": "2026-06-06T12:19:58+00:00"
+      }
+    ]
+  }
+]
+
+## PVカルテ由来の推移情報
+{
+  "record_count": 0,
+  "latest_rows": [],
+  "growth_top": [],
+  "stagnant_or_decline": []
+}
+
+## ギルドファイル由来の情報
+[]
+
+## AIへの作文指示
+- 上記の材料だけを使って、このギルド専用の自然な日本語コメントを作成してください。
+- 数字が不足している項目は断定せず、情報不足として扱ってください。
+- 良い点、注意点、次に見るべき点が分かる文章にしてください。
+- 出力は指定されたJSON形式だけにしてください。

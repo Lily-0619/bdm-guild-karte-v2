@@ -1,0 +1,23 @@
+bdm-guild-karte/
+├─ src/
+│  ├─ scraper.py
+│  ├─ analyze.py
+│  ├─ make_card.py
+│  └─ app.py
+│
+├─ bot/
+│  ├─ __init__.py
+│  ├─ main.py              ← Bot起動本体
+│  ├─ config.py            ← .envやパス管理
+│  ├─ file_finder.py       ← output/cards からPNGを探す処理
+│  └─ commands/
+│     ├─ __init__.py
+│     └─ karte.py          ← /guilds /karte /members /both
+│
+├─ config/
+├─ output/
+├─ template/
+├─ analysis/
+├─ data/
+├─ .env
+└─ requirements.txt

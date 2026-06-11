@@ -1,0 +1,139 @@
+{
+  "material_type": "guild_autocomment_material",
+  "guild_name": "一Arch一",
+  "old_date": "2026-06-07",
+  "new_date": "2026-06-08",
+  "old_display_date": "2026-06-07",
+  "new_display_date": "2026-06-08",
+  "old_compact_date": "20260607",
+  "new_compact_date": "20260608",
+  "period": {
+    "old_date": "2026-06-07",
+    "new_date": "2026-06-08"
+  },
+  "key_metrics": {
+    "member_count": null,
+    "avg_cpm": null,
+    "total_cpm": null,
+    "rank": null
+  },
+  "deltas": {},
+  "member_changes": {
+    "exact_match_count": null,
+    "exact_matches_sample": [],
+    "new_joiners": [],
+    "unknown_members": [],
+    "renamed_members": [],
+    "transferred_members": []
+  },
+  "growth_top": [],
+  "stagnant_or_decline": [],
+  "summary_records": [],
+  "sqlite_rows": [
+    {
+      "name": "guild_snapshots",
+      "columns": [
+        "id",
+        "retrieved_at",
+        "guild_name",
+        "member_count",
+        "avg_cpm",
+        "total_cpm",
+        "created_at"
+      ],
+      "rows": [
+        {
+          "id": 40,
+          "retrieved_at": "2026-05-29 11:40",
+          "guild_name": "一Arch一",
+          "member_count": 38,
+          "avg_cpm": 98061,
+          "total_cpm": 4118559,
+          "created_at": "2026-06-04 11:39:28"
+        },
+        {
+          "id": 101,
+          "retrieved_at": "2026-06-06 23:15",
+          "guild_name": "一Arch一",
+          "member_count": 43,
+          "avg_cpm": 97613.79069767441,
+          "total_cpm": 4197393,
+          "created_at": "2026-06-06T14:15:12+00:00"
+        }
+      ]
+    },
+    {
+      "name": "guild_summary_snapshots",
+      "columns": [
+        "id",
+        "retrieved_at",
+        "guild_name",
+        "avg_cp",
+        "total_cp",
+        "total_family_cp",
+        "active_member_count",
+        "low_member_cp",
+        "high_member_cp",
+        "declared_on_other_guild",
+        "declared_by_other_guild",
+        "total_war",
+        "all_time_win_rate",
+        "most_war_with_guild",
+        "total_node_wars",
+        "node_won",
+        "total_siege_wars",
+        "siege_won",
+        "currently_holding",
+        "summary_json",
+        "created_at"
+      ],
+      "rows": [
+        {
+          "id": 41,
+          "retrieved_at": "2026-06-06 23:15",
+          "guild_name": "一Arch一",
+          "avg_cp": 97434.0,
+          "total_cp": 4189648,
+          "total_family_cp": 21470435,
+          "active_member_count": 43,
+          "low_member_cp": 88399,
+          "high_member_cp": 117952,
+          "declared_on_other_guild": 0,
+          "declared_by_other_guild": 0,
+          "total_war": 0,
+          "all_time_win_rate": 0.0,
+          "most_war_with_guild": null,
+          "total_node_wars": 0,
+          "node_won": 0,
+          "total_siege_wars": 0,
+          "siege_won": 0,
+          "currently_holding": "None",
+          "summary_json": "{\"active_member_count\": \"43\", \"all_time_win_rate\": \"0.00%\", \"avg_cp\": \"97434\", \"currently_holding\": \"None\", \"declared_by_other_guild\": \"0\", \"declared_on_other_guild\": \"0\", \"high_member_cp\": \"117952\", \"low_member_cp\": \"88399\", \"most_war_with_guild\": \"\", \"node_won\": \"0\", \"siege_won\": \"0\", \"total_cp\": \"4189648\", \"total_family_cp\": \"21470435\", \"total_node_wars\": \"0\", \"total_siege_wars\": \"0\", \"total_war\": \"0\"}",
+          "created_at": "2026-06-06T14:15:12+00:00"
+        }
+      ]
+    }
+  ],
+  "pv_trends": {
+    "record_count": 0,
+    "latest_rows": [],
+    "growth_top": [],
+    "stagnant_or_decline": []
+  },
+  "personal_pv_records": [],
+  "unknown_pv_records": [],
+  "summary_rows": [],
+  "personal_pv_rows": [],
+  "unknown_pv_rows": [],
+  "guild_files": [],
+  "guild_warnings": [
+    "summary由来のギルド集計情報が不足しています。",
+    "PVカルテ由来の個人推移情報が不足しています。"
+  ],
+  "ai_instruction": [
+    "このギルド専用材料だけを使って自然な日本語コメントを作成する。",
+    "不足データは断定せず情報不足として扱う。",
+    "良い点、注意点、次に見るべき点を含める。",
+    "指定JSON形式のみで返す。"
+  ]
+}

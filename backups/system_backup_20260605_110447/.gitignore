@@ -1,0 +1,12 @@
+.env
+.venv/
+data/
+__pycache__/
+*.pyc
+output/
+analysis/
+logs/
+backups/
+backup/
+*.zip
+*.log

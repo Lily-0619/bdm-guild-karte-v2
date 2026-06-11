@@ -1,0 +1,145 @@
+# ギルド別AutoComment AI作文材料
+ギルド名: Phoenix
+対象期間: 2026-06-07 → 2026-06-08
+
+## 材料不足・注意
+- summary由来のギルド集計情報が不足しています。
+- PVカルテ由来の個人推移情報が不足しています。
+
+## 主要指標
+- 人数: None
+- 平均CPM: None
+- 総CPM: None
+- 順位: None
+
+## 前回との差分
+- 差分を計算できる前回データが不足しています。
+
+## メンバー変化
+- 完全一致人数: None
+- 新規加入者: []
+- 追跡不明者: []
+- 名前変更者: []
+- 移籍者: []
+
+## CPM伸び上位
+- 該当データなし
+
+## 停滞・減少情報
+- 目立つ停滞・減少データなし
+
+## summary由来の情報
+[]
+
+## SQLite由来の情報
+[
+  {
+    "name": "guild_snapshots",
+    "columns": [
+      "id",
+      "retrieved_at",
+      "guild_name",
+      "member_count",
+      "avg_cpm",
+      "total_cpm",
+      "created_at"
+    ],
+    "rows": [
+      {
+        "id": 17,
+        "retrieved_at": "2026-05-28 22:05",
+        "guild_name": "Phoenix",
+        "member_count": 49,
+        "avg_cpm": 103505,
+        "total_cpm": 5071724,
+        "created_at": "2026-06-04 11:39:27"
+      },
+      {
+        "id": 18,
+        "retrieved_at": "2026-05-29 09:53",
+        "guild_name": "Phoenix",
+        "member_count": 49,
+        "avg_cpm": 103528,
+        "total_cpm": 5072854,
+        "created_at": "2026-06-04 11:39:27"
+      },
+      {
+        "id": 81,
+        "retrieved_at": "2026-06-06 21:54",
+        "guild_name": "Phoenix",
+        "member_count": 47,
+        "avg_cpm": 104588.63829787234,
+        "total_cpm": 4915666,
+        "created_at": "2026-06-06T12:54:19+00:00"
+      }
+    ]
+  },
+  {
+    "name": "guild_summary_snapshots",
+    "columns": [
+      "id",
+      "retrieved_at",
+      "guild_name",
+      "avg_cp",
+      "total_cp",
+      "total_family_cp",
+      "active_member_count",
+      "low_member_cp",
+      "high_member_cp",
+      "declared_on_other_guild",
+      "declared_by_other_guild",
+      "total_war",
+      "all_time_win_rate",
+      "most_war_with_guild",
+      "total_node_wars",
+      "node_won",
+      "total_siege_wars",
+      "siege_won",
+      "currently_holding",
+      "summary_json",
+      "created_at"
+    ],
+    "rows": [
+      {
+        "id": 21,
+        "retrieved_at": "2026-06-06 21:54",
+        "guild_name": "Phoenix",
+        "avg_cp": 104531.0,
+        "total_cp": 4912949,
+        "total_family_cp": 27898145,
+        "active_member_count": 47,
+        "low_member_cp": 43987,
+        "high_member_cp": 129802,
+        "declared_on_other_guild": 0,
+        "declared_by_other_guild": 0,
+        "total_war": 0,
+        "all_time_win_rate": 0.0,
+        "most_war_with_guild": null,
+        "total_node_wars": 68,
+        "node_won": 32,
+        "total_siege_wars": 9,
+        "siege_won": 3,
+        "currently_holding": "T2 Orc Camp",
+        "summary_json": "{\"active_member_count\": \"47\", \"all_time_win_rate\": \"0.00%\", \"avg_cp\": \"104531\", \"currently_holding\": \"T2 Orc Camp\", \"declared_by_other_guild\": \"0\", \"declared_on_other_guild\": \"0\", \"high_member_cp\": \"129802\", \"low_member_cp\": \"43987\", \"most_war_with_guild\": \"\", \"node_won\": \"32\", \"siege_won\": \"3\", \"total_cp\": \"4912949\", \"total_family_cp\": \"27898145\", \"total_node_wars\": \"68\", \"total_siege_wars\": \"9\", \"total_war\": \"0\"}",
+        "created_at": "2026-06-06T12:54:19+00:00"
+      }
+    ]
+  }
+]
+
+## PVカルテ由来の推移情報
+{
+  "record_count": 0,
+  "latest_rows": [],
+  "growth_top": [],
+  "stagnant_or_decline": []
+}
+
+## ギルドファイル由来の情報
+[]
+
+## AIへの作文指示
+- 上記の材料だけを使って、このギルド専用の自然な日本語コメントを作成してください。
+- 数字が不足している項目は断定せず、情報不足として扱ってください。
+- 良い点、注意点、次に見るべき点が分かる文章にしてください。
+- 出力は指定されたJSON形式だけにしてください。

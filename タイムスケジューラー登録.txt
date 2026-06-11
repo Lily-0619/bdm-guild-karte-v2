@@ -1,0 +1,96 @@
+まず決めること
+
+例としてこうするなら、
+
+起動：19:00
+停止：01:00
+
+下のコマンドで登録できる。
+
+時間を変えたい場合は、19:00 と 01:00 だけ変えればOK。
+
+自動起動タスクを登録
+
+PowerShellで実行。
+
+$projectRoot = (Get-Location).Path
+$script = Join-Path $projectRoot "bot_power.ps1"
+
+$startAction = New-ScheduledTaskAction `
+    -Execute "powershell.exe" `
+    -Argument "-NoProfile -ExecutionPolicy Bypass -File `"$script`" start"
+
+$startTrigger = New-ScheduledTaskTrigger -Daily -At "19:00"
+
+$settings = New-ScheduledTaskSettingsSet `
+    -AllowStartIfOnBatteries `
+    -DontStopIfGoingOnBatteries `
+    -WakeToRun
+
+Register-ScheduledTask `
+    -TaskName "Mbot Auto Start" `
+    -Action $startAction `
+    -Trigger $startTrigger `
+    -Settings $settings `
+    -Description "定刻にMぼっとを起動する" `
+    -Force
+自動停止タスクを登録
+$projectRoot = (Get-Location).Path
+$script = Join-Path $projectRoot "bot_power.ps1"
+
+$stopAction = New-ScheduledTaskAction `
+    -Execute "powershell.exe" `
+    -Argument "-NoProfile -ExecutionPolicy Bypass -File `"$script`" stop"
+
+$stopTrigger = New-ScheduledTaskTrigger -Daily -At "01:00"
+
+$settings = New-ScheduledTaskSettingsSet `
+    -AllowStartIfOnBatteries `
+    -DontStopIfGoingOnBatteries `
+    -WakeToRun
+
+Register-ScheduledTask `
+    -TaskName "Mbot Auto Stop" `
+    -Action $stopAction `
+    -Trigger $stopTrigger `
+    -Settings $settings `
+    -Description "定刻にMぼっとを停止する" `
+    -Force
+登録できたか確認
+Get-ScheduledTask | Where-Object {
+    $_.TaskName -like "Mbot Auto*"
+}
+
+出ればOK。
+
+手動テスト
+
+自動起動タスクを今すぐ実行してみる。
+
+Start-ScheduledTask -TaskName "Mbot Auto Start"
+
+数秒待って確認。
+
+cd <bdm-guild-karteを置いた場所>
+powershell -ExecutionPolicy Bypass -File .\bot_power.ps1 status
+
+停止もテスト。
+
+Start-ScheduledTask -TaskName "Mbot Auto Stop"
+
+確認。
+
+powershell -ExecutionPolicy Bypass -File .\bot_power.ps1 status
+注意
+
+これは PCが起動している、またはスリープから復帰できる状態 が前提。
+完全に電源OFFだと実行できない。
+
+あと今後は、なるべくこれに統一すると安全。
+
+手動起動：bot_power.ps1 start
+手動停止：bot_power.ps1 stop
+状態確認：bot_power.ps1 status
+定刻起動：タスクスケジューラ
+
+python -m bot.main を直接叩くと、またMぼっとが分身しやすい。

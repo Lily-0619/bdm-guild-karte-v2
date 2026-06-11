@@ -1,0 +1,581 @@
+黒い砂漠モバイルの便利ツール一式です
+
+開発開始日　2026/5/25～
+
+
+Dbankからのデータ取得
+Bot機能
+を開発してます。
+
+今後、サムネやゲームシステムも記憶させて簡単な質問ならAIが答えられるようにします
+
+
+
+
+現在できていること
+✅ DBonkからギルド情報取得
+✅ ギルド別Excel保存
+✅ members / summary / node_history シート作成
+✅ SQLite保存
+✅ 既存ExcelからSQLite取り込み
+✅ analysis summary作成
+✅ カルテPNG作成
+✅ Discord BotからPNG投稿
+✅ オーガタイマー
+✅ MぼっとAIトーク
+✅ Bot起動停止スクリプト
+✅ 古いPNG整理スクリプト
+✅ システムバックアップ作成
+
+
+まだ次フェーズでやること
+優先度高め
+1. pipeline.py 作成
+   scraper → import/db → analyze → make_card を1本化する
+
+2. SQLiteの中身確認コマンド作成
+   例：最新取得一覧、ギルド別件数、前回との差分
+
+3. analyze.py をSQLite対応にするか検討
+   今はExcelベース
+
+4. 古いPNG整理の実運用
+   dry-run後にkeep-latest-per-guild実行
+後でやる
+1. AI分析機能
+   SQLiteから集計 → AIが説明
+
+2. クラス名対応
+   新クラス名がDBonkに実装されてから抽出対象リスト作成
+
+3. MぼっとAIモデル改善
+   現在の軽量モデルから翻訳・言語化に強いモデルへ変更
+
+4. SD画像生成環境構築
+
+
+
+
+
+
+bdm-guild-karte
+├─ src
+│  ├─ app.py
+│  ├─ scraper.py
+│  ├─ db.py
+│  ├─ import_excel_to_db.py
+│  ├─ analyze.py
+│  ├─ make_card.py
+│  └─ cleanup_outputs.py
+│
+├─ bot
+│  ├─ main.py
+│  ├─ bot_app.py
+│  ├─ config.py
+│  ├─ cogs
+│  │  ├─ admin.py
+│  │  ├─ ai_talk.py
+│  │  ├─ karte.py
+│  │  └─ ogre_timer.py
+│  ├─ services
+│  │  └─ ollama_service.py
+│  └─ utils
+│     └─ file_finder.py
+│
+├─ config
+│  ├─ guilds.txt
+│  ├─ card_guilds.txt
+│  └─ m_persona.txt
+│
+├─ data
+│  ├─ bdm_guild.sqlite3
+│  └─ ギルド別Excel
+│
+├─ analysis
+│  └─ summary_日付.xlsx
+│
+├─ output
+│  └─ cards
+│     └─ ギルド別PNG
+│
+├─ template
+│  └─ karte.xlsx
+│
+├─ ui
+│  └─ assets
+│
+├─ buhin
+├─ backup
+├─ backups
+├─ logs
+├─ bot_power.ps1
+├─ requirements.txt
+├─ .gitignore
+├─ start.bat
+├─ start_app.vbs
+├─ start_app_debug.bat
+└─ start_bot.bat
+
+
+▽src フォルダ
+・src/app.py
+カルテ作成ツールのGUIアプリ本体。
+
+PySide6で作られたデスクトップアプリ。
+ボタン操作で以下を実行するための画面。
+
+DBonk取得
+summary作成
+カルテPNG作成
+ログ表示
+設定ファイル編集
+
+背景画像やアイコンは ui/assets を参照している。
+
+
+・src/scraper.py
+DBonkからギルドデータを取得する本体。
+
+PlaywrightでDBonkにログインし、Guild Rankingからギルドを検索して、詳細ページから以下を取得する。
+
+members
+summary
+node_history
+
+保存先：
+
+data/ギルド名/guild_ギルド名_日付.xlsx
+data/bdm_guild.sqlite3
+
+現在の状態では、DBonk取得処理は維持されていて、Excel保存後にSQLite保存も行う。
+save_guild_snapshot_to_sqlite() が追加済みで、Excel保存後に呼び出される。
+
+重要な処理：
+
+DBonkログイン
+Asiaサーバー選択
+Guild Ranking検索
+ギルド詳細ページ遷移
+Active Guild Members取得
+summary取得
+node_history取得
+Excel保存
+SQLite保存
+src/db.py
+
+SQLite保存用の共通処理。
+
+DBの場所：
+
+・data/bdm_guild.sqlite3
+
+作成・管理するテーブル：
+
+guild_snapshots
+member_snapshots
+import_files
+node_history_snapshots
+guild_summary_snapshots
+
+保存される情報：
+
+ギルド単位の取得履歴
+メンバーごとのCPM/FCP/レベル
+summary情報
+node_history情報
+既存Excelの取り込み済み管理
+
+member_snapshots には、将来のクラス名対応用に以下の枠あり。
+
+class_name_raw
+class_name_normalized
+class_name_version
+
+今はクラス名の抽出は未実装。
+新クラス名が実装されてDBonk表示が安定したら対応予定。
+
+src/import_excel_to_db.py
+
+既存ExcelをSQLiteへ取り込む移行用スクリプト。
+
+対象：
+
+data/**/guild_*.xlsx
+
+取り込むシート：
+
+members
+summary
+node_history
+
+使い方：
+
+python -m src.import_excel_to_db
+
+目的：
+
+過去に作ったExcelをSQLiteにまとめて入れる
+
+import_files で取り込み済みを管理する。
+file_pathは絶対パスではなく、原則としてプロジェクトルートからの相対パスで保存する方針。
+
+src/analyze.py
+
+ギルドExcelを読み込んでsummaryを作る分析処理。
+
+入力：
+
+data/ギルド名/guild_ギルド名_日付.xlsx
+
+出力：
+
+analysis/summary_日付.xlsx
+
+計算している内容：
+
+平均CPM
+総CPM
+人数
+CPM帯ごとの人数
+中央値
+順位
+上位依存度
+層の厚さ
+伸び傾向
+自動コメント
+
+現時点では Excelベースの分析。
+SQLite読み込みにはまだ完全移行していない。
+
+src/make_card.py
+
+カルテPNG生成処理。
+
+入力：
+
+analysis/summary_日付.xlsx
+data/ギルド名/guild_ギルド名_日付.xlsx
+template/karte.xlsx
+
+出力：
+
+output/cards/ギルド名/karte_ギルド名_日付.png
+
+主な処理：
+
+summaryからギルド情報を読む
+ギルドExcelからメンバー一覧を読む
+template/karte.xlsx のプレースホルダーを置換
+メンバー欄を書き込み
+グラフ作成
+Excel経由でPNG出力
+src/cleanup_outputs.py
+
+古いカルテPNG整理用スクリプト。
+
+目的：
+
+カルテPNGは最新以外いらないので整理する
+
+使い方：
+
+python -m src.cleanup_outputs --dry-run
+python -m src.cleanup_outputs --keep-latest-per-guild
+
+デフォルトは、ギルドごとに最新1枚を残す方針。
+
+重要：
+
+PNGを削除してもSQLiteデータは消えない
+bot フォルダ
+bot/main.py
+
+Discord Botの起動本体。
+
+読み込むCog：
+
+bot.cogs.karte
+bot.cogs.ogre_timer
+bot.cogs.admin
+bot.cogs.ai_talk
+
+起動時にスラッシュコマンドを同期する。
+.env に DISCORD_NOTIFY_USER_ID がある場合、起動時に指定ユーザーへDM通知する処理あり。
+
+bot/bot_app.py
+
+Bot起動・停止用のGUIアプリ。
+
+PySide6で作られたBot管理画面。
+Botプロセスの起動・停止・ログ表示に使う。
+
+bot/config.py
+
+Discord Bot用の設定定数。
+
+.env から以下のような値を読む。
+
+DISCORD_BOT_TOKEN
+DISCORD_GUILD_ID
+DISCORD_NOTIFY_USER_ID
+OLLAMA_BASE_URL
+OLLAMA_MODEL
+OLLAMA_TIMEOUT_SECONDS
+OLLAMA_NUM_CTX
+bot/cogs/karte.py
+
+カルテPNGをDiscordへ投稿するコマンド。
+
+スラッシュコマンド：
+
+/guilds
+/karte
+/members
+/both
+
+役割：
+
+output/cards 内のギルド一覧表示
+指定ギルドの最新カルテPNG投稿
+指定ギルドの最新メンバーPNG投稿
+カルテ＋メンバーPNGまとめ投稿
+bot/cogs/ogre_timer.py
+
+オーガタイマー機能。
+
+仕様：
+
+オーガ討伐後10分で再出現
+討伐後5分バフ
+開始ボタンを押した時点から10分計測
+ループなし
+
+通知タイミング：
+
+オーガ没
+バフおわり
+3分前
+2分前
+1分前
+30秒前
+15秒前
+オーガ
+
+コマンド：
+
+/ogre
+
+Discord上にボタン付きタイマーパネルを出す。
+
+bot/cogs/admin.py
+
+Bot投稿ログ整理用コマンド。
+
+コマンド：
+
+/clean_bot_logs
+
+現在のチャンネル内で、Bot自身が投稿したメッセージだけを削除する。
+
+bot/cogs/ai_talk.py
+
+MぼっとAIトーク機能。
+
+コマンド：
+
+/talk
+
+現在の主な仕様：
+
+mode: chat / translate
+language: JP / EN / FR / ZH / RU / ES / AR
+通常chatは会話履歴を保持
+translate modeは履歴保存しない
+ユーザーID＋チャンネルIDごとに履歴管理
+直近履歴＋簡易要約メモリ
+回数制限・クールダウンあり
+
+翻訳や多言語会話は一応実装済みだが、使用モデルが軽量なため精度はまだ弱め。
+将来的に高性能モデルや翻訳専用モデルへ変更予定。
+
+bot/services/ollama_service.py
+
+Ollama連携処理。
+
+Ollamaの /api/chat にリクエストを送る。
+
+設定：
+
+OLLAMA_BASE_URL
+OLLAMA_MODEL
+OLLAMA_TIMEOUT_SECONDS
+OLLAMA_NUM_CTX
+
+config/m_persona.txt を読み込んで、Mぼっとの人格・返答ルールをsystem promptに入れる。
+
+bot/utils/file_finder.py
+
+PNGファイル探索用ユーティリティ。
+
+output/cards から、
+
+ギルドフォルダ一覧
+指定ギルドの最新PNG
+
+を探す補助処理。
+
+config フォルダ
+config/guilds.txt
+
+DBonkで取得するギルド一覧。
+scraper.py が読む。
+
+1行に1ギルド名
+config/card_guilds.txt
+
+カルテPNGを作成する対象ギルド一覧。
+make_card.py が読む。
+
+config/m_persona.txt
+
+MぼっとAIの人格・ルール設定。
+
+内容：
+
+Mぼっとのペルソナ
+通常日本語応答
+翻訳モード
+言語指定chat
+禁止事項
+個人情報を扱わない
+危険操作前に止める
+data フォルダ
+data/bdm_guild.sqlite3
+
+現在の分析データ本体。
+
+保存されているもの：
+
+ギルド取得履歴
+メンバーCPM/FCP/レベル
+summary情報
+node_history情報
+Excel取り込み済み管理
+
+今後のAI分析や長期推移分析では、このSQLiteが本体になる。
+
+data/ギルド名/guild_ギルド名_日付.xlsx
+
+DBonkから取得したギルド別Excel。
+
+中身：
+
+members
+summary
+node_history
+
+現在はExcelも残しているが、長期的にはSQLiteが分析本体。
+Excelは目視確認・保険。
+
+analysis フォルダ
+analysis/summary_日付.xlsx
+
+src/analyze.py が作る分析結果Excel。
+
+用途：
+
+カルテ作成用の中間データ
+ギルド比較
+順位付け
+自動コメント
+output フォルダ
+output/cards/ギルド名/*.png
+
+カルテPNGやメンバーPNGの出力先。
+
+現在かなり容量を食いやすい場所。
+最新以外は不要方針。
+
+整理用：
+
+python -m src.cleanup_outputs --dry-run
+python -m src.cleanup_outputs --keep-latest-per-guild
+template フォルダ
+template/karte.xlsx
+
+カルテ画像生成の元テンプレート。
+make_card.py がこのExcelをコピー・編集してPNG化する。
+
+ui / buhin フォルダ
+ui/assets
+
+GUIアプリ用素材。
+
+backdesign.png
+cat_elf_app_icon.ico
+cat_elf_app_icon.icns
+buhin
+
+UIやテンプレート用の画像部品。
+
+backup / backups フォルダ
+backup
+
+過去の完成形や手動保存した旧コード。
+
+例：
+
+scraper完成形20260529.txt
+analyze完成形20260529.txt
+一式完成/
+backups
+
+今回作ったシステムバックアップや、Bot改修前バックアップ。
+
+重要：
+
+backups/bdm-guild-karte_system_20260605_110447.zip
+backups/system_backup_20260605_110447/
+
+これは今回の一区切りバックアップ。
+
+logs フォルダ
+
+Botやアプリのログ。
+
+logs/bot_stdout.log
+logs/bot_stderr.log
+起動・補助ファイル
+bot_power.ps1
+
+MぼっとDiscord Botの起動・停止・状態確認用PowerShell。
+
+使い方：
+
+powershell -ExecutionPolicy Bypass -File .\bot_power.ps1 start
+powershell -ExecutionPolicy Bypass -File .\bot_power.ps1 stop
+powershell -ExecutionPolicy Bypass -File .\bot_power.ps1 status
+
+重複起動対策あり。
+
+start.bat
+
+おそらくアプリ起動用バッチ。
+
+start_app.vbs
+
+GUIアプリ起動用VBS。
+ショートカットから起動しやすくするためのもの。
+
+start_app_debug.bat
+
+デバッグ表示ありでアプリ起動する用。
+
+start_bot.bat
+
+Bot起動用バッチ。
+
+clear_global_commands.py
+
+Discordのグローバルスラッシュコマンド整理用。
+過去に / コマンドが重複表示されたとき用の補助。

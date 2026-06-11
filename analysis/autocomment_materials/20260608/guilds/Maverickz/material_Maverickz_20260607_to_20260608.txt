@@ -1,0 +1,183 @@
+# ギルド別AutoComment AI作文材料
+ギルド名: Maverickz
+対象期間: 2026-06-07 → 2026-06-08
+
+## 材料不足・注意
+- summary由来のギルド集計情報が不足しています。
+- PVカルテ由来の個人推移情報が不足しています。
+
+## 主要指標
+- 人数: None
+- 平均CPM: None
+- 総CPM: None
+- 順位: None
+
+## 前回との差分
+- 差分を計算できる前回データが不足しています。
+
+## メンバー変化
+- 完全一致人数: None
+- 新規加入者: []
+- 追跡不明者: []
+- 名前変更者: []
+- 移籍者: []
+
+## CPM伸び上位
+- 該当データなし
+
+## 停滞・減少情報
+- 目立つ停滞・減少データなし
+
+## summary由来の情報
+[]
+
+## SQLite由来の情報
+[
+  {
+    "name": "guild_snapshots",
+    "columns": [
+      "id",
+      "retrieved_at",
+      "guild_name",
+      "member_count",
+      "avg_cpm",
+      "total_cpm",
+      "created_at"
+    ],
+    "rows": [
+      {
+        "id": 9,
+        "retrieved_at": "2026-05-29 10:02",
+        "guild_name": "Maverickz",
+        "member_count": 46,
+        "avg_cpm": 100188,
+        "total_cpm": 4608670,
+        "created_at": "2026-06-04 11:39:26"
+      },
+      {
+        "id": 85,
+        "retrieved_at": "2026-06-06 22:02",
+        "guild_name": "Maverickz",
+        "member_count": 49,
+        "avg_cpm": 99590.44897959183,
+        "total_cpm": 4879932,
+        "created_at": "2026-06-06T13:02:56+00:00"
+      }
+    ]
+  },
+  {
+    "name": "guild_summary_snapshots",
+    "columns": [
+      "id",
+      "retrieved_at",
+      "guild_name",
+      "avg_cp",
+      "total_cp",
+      "total_family_cp",
+      "active_member_count",
+      "low_member_cp",
+      "high_member_cp",
+      "declared_on_other_guild",
+      "declared_by_other_guild",
+      "total_war",
+      "all_time_win_rate",
+      "most_war_with_guild",
+      "total_node_wars",
+      "node_won",
+      "total_siege_wars",
+      "siege_won",
+      "currently_holding",
+      "summary_json",
+      "created_at"
+    ],
+    "rows": [
+      {
+        "id": 25,
+        "retrieved_at": "2026-06-06 22:02",
+        "guild_name": "Maverickz",
+        "avg_cp": 99537.0,
+        "total_cp": 4877304,
+        "total_family_cp": 27173358,
+        "active_member_count": 49,
+        "low_member_cp": 91107,
+        "high_member_cp": 109841,
+        "declared_on_other_guild": 51,
+        "declared_by_other_guild": 64,
+        "total_war": 115,
+        "all_time_win_rate": 55.65,
+        "most_war_with_guild": null,
+        "total_node_wars": 148,
+        "node_won": 77,
+        "total_siege_wars": 26,
+        "siege_won": 1,
+        "currently_holding": "None",
+        "summary_json": "{\"active_member_count\": \"49\", \"all_time_win_rate\": \"55.65%\", \"avg_cp\": \"99537\", \"currently_holding\": \"None\", \"declared_by_other_guild\": \"64\", \"declared_on_other_guild\": \"51\", \"high_member_cp\": \"109841\", \"low_member_cp\": \"91107\", \"most_war_with_guild\": \"\", \"node_won\": \"77\", \"siege_won\": \"1\", \"total_cp\": \"4877304\", \"total_family_cp\": \"27173358\", \"total_node_wars\": \"148\", \"total_siege_wars\": \"26\", \"total_war\": \"115\"}",
+        "created_at": "2026-06-06T13:02:56+00:00"
+      }
+    ]
+  },
+  {
+    "name": "pv_identity_links",
+    "columns": [
+      "id",
+      "old_date",
+      "new_date",
+      "old_family_name",
+      "old_guild_name",
+      "new_family_name",
+      "new_guild_name",
+      "old_pv_file",
+      "new_pv_file",
+      "link_type",
+      "linked_at",
+      "note"
+    ],
+    "rows": [
+      {
+        "id": 3,
+        "old_date": "20260529",
+        "new_date": "20260606",
+        "old_family_name": "DiedVirgln",
+        "old_guild_name": "Maverickz",
+        "new_family_name": "DiedVirgln",
+        "new_guild_name": "Myst",
+        "old_pv_file": "D:\\bdm-guild-karte\\deta_PV\\Maverickz_DiedVirgln.xlsx",
+        "new_pv_file": "D:\\bdm-guild-karte\\deta_PV\\Myst_DiedVirgln.xlsx",
+        "link_type": "guild_transfer",
+        "linked_at": "2026-06-08T12:35:17",
+        "note": ""
+      },
+      {
+        "id": 4,
+        "old_date": "20260529",
+        "new_date": "20260606",
+        "old_family_name": "PlERRE",
+        "old_guild_name": "Maverickz",
+        "new_family_name": "PlERRE",
+        "new_guild_name": "當惡魔遇到殺手貓",
+        "old_pv_file": "D:\\bdm-guild-karte\\deta_PV\\Maverickz_PlERRE.xlsx",
+        "new_pv_file": "D:\\bdm-guild-karte\\deta_PV\\當惡魔遇到殺手貓_PlERRE.xlsx",
+        "link_type": "guild_transfer",
+        "linked_at": "2026-06-08T12:35:20",
+        "note": ""
+      }
+    ]
+  }
+]
+
+## PVカルテ由来の推移情報
+{
+  "record_count": 0,
+  "latest_rows": [],
+  "growth_top": [],
+  "stagnant_or_decline": []
+}
+
+## ギルドファイル由来の情報
+[]
+
+## AIへの作文指示
+- 上記の材料だけを使って、このギルド専用の自然な日本語コメントを作成してください。
+- 数字が不足している項目は断定せず、情報不足として扱ってください。
+- 良い点、注意点、次に見るべき点が分かる文章にしてください。
+- 出力は指定されたJSON形式だけにしてください。

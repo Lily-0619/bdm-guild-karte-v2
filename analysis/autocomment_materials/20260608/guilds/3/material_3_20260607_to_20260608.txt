@@ -1,0 +1,559 @@
+# ギルド別AutoComment AI作文材料
+ギルド名: 3
+対象期間: 2026-06-07 → 2026-06-08
+
+## 材料不足・注意
+- summary由来のギルド集計情報が不足しています。
+- PVカルテ由来の個人推移情報が不足しています。
+
+## 主要指標
+- 人数: None
+- 平均CPM: None
+- 総CPM: None
+- 順位: None
+
+## 前回との差分
+- 差分を計算できる前回データが不足しています。
+
+## メンバー変化
+- 完全一致人数: None
+- 新規加入者: []
+- 追跡不明者: []
+- 名前変更者: []
+- 移籍者: []
+
+## CPM伸び上位
+- 該当データなし
+
+## 停滞・減少情報
+- 目立つ停滞・減少データなし
+
+## summary由来の情報
+[]
+
+## SQLite由来の情報
+[
+  {
+    "name": "guild_snapshots",
+    "columns": [
+      "id",
+      "retrieved_at",
+      "guild_name",
+      "member_count",
+      "avg_cpm",
+      "total_cpm",
+      "created_at"
+    ],
+    "rows": [
+      {
+        "id": 3,
+        "retrieved_at": "2026-06-01 09:21",
+        "guild_name": "AlmaVivaJP",
+        "member_count": 48,
+        "avg_cpm": 116353,
+        "total_cpm": 5584946,
+        "created_at": "2026-06-04 11:39:04"
+      }
+    ]
+  },
+  {
+    "name": "guild_summary_snapshots",
+    "columns": [
+      "id",
+      "retrieved_at",
+      "guild_name",
+      "avg_cp",
+      "total_cp",
+      "total_family_cp",
+      "active_member_count",
+      "low_member_cp",
+      "high_member_cp",
+      "declared_on_other_guild",
+      "declared_by_other_guild",
+      "total_war",
+      "all_time_win_rate",
+      "most_war_with_guild",
+      "total_node_wars",
+      "node_won",
+      "total_siege_wars",
+      "siege_won",
+      "currently_holding",
+      "summary_json",
+      "created_at"
+    ],
+    "rows": [
+      {
+        "id": 3,
+        "retrieved_at": "2026-06-06 21:14",
+        "guild_name": "Myst",
+        "avg_cp": 107311.0,
+        "total_cp": 5043596,
+        "total_family_cp": 29776948,
+        "active_member_count": 47,
+        "low_member_cp": 96489,
+        "high_member_cp": 125586,
+        "declared_on_other_guild": 349,
+        "declared_by_other_guild": 130,
+        "total_war": 479,
+        "all_time_win_rate": 88.19,
+        "most_war_with_guild": "RaиkSS",
+        "total_node_wars": 88,
+        "node_won": 71,
+        "total_siege_wars": 206,
+        "siege_won": 162,
+        "currently_holding": "T2 Highlands",
+        "summary_json": "{\"active_member_count\": \"47\", \"all_time_win_rate\": \"88.19%\", \"avg_cp\": \"107311\", \"currently_holding\": \"T2 Highlands\", \"declared_by_other_guild\": \"130\", \"declared_on_other_guild\": \"349\", \"high_member_cp\": \"125586\", \"low_member_cp\": \"96489\", \"most_war_with_guild\": \"RaиkSS\", \"node_won\": \"71\", \"siege_won\": \"162\", \"total_cp\": \"5043596\", \"total_family_cp\": \"29776948\", \"total_node_wars\": \"88\", \"total_siege_wars\": \"206\", \"total_war\": \"479\"}",
+        "created_at": "2026-06-06T12:14:33+00:00"
+      },
+      {
+        "id": 6,
+        "retrieved_at": "2026-06-06 21:19",
+        "guild_name": "・殺戮・",
+        "avg_cp": 112389.0,
+        "total_cp": 5394685,
+        "total_family_cp": 34787933,
+        "active_member_count": 48,
+        "low_member_cp": 52310,
+        "high_member_cp": 136669,
+        "declared_on_other_guild": 3,
+        "declared_by_other_guild": 11,
+        "total_war": 14,
+        "all_time_win_rate": 0.0,
+        "most_war_with_guild": "RaиkSS",
+        "total_node_wars": 91,
+        "node_won": 41,
+        "total_siege_wars": 3,
+        "siege_won": 0,
+        "currently_holding": "T3 Altar of Agris",
+        "summary_json": "{\"active_member_count\": \"48\", \"all_time_win_rate\": \"0.00%\", \"avg_cp\": \"112389\", \"currently_holding\": \"T3 Altar of Agris\", \"declared_by_other_guild\": \"11\", \"declared_on_other_guild\": \"3\", \"high_member_cp\": \"136669\", \"low_member_cp\": \"52310\", \"most_war_with_guild\": \"RaиkSS\", \"node_won\": \"41\", \"siege_won\": \"0\", \"total_cp\": \"5394685\", \"total_family_cp\": \"34787933\", \"total_node_wars\": \"91\", \"total_siege_wars\": \"3\", \"total_war\": \"14\"}",
+        "created_at": "2026-06-06T12:19:58+00:00"
+      },
+      {
+        "id": 13,
+        "retrieved_at": "2026-06-06 21:39",
+        "guild_name": "・殺戮・",
+        "avg_cp": 112389.0,
+        "total_cp": 5394685,
+        "total_family_cp": 34787933,
+        "active_member_count": 48,
+        "low_member_cp": 52310,
+        "high_member_cp": 136669,
+        "declared_on_other_guild": 3,
+        "declared_by_other_guild": 11,
+        "total_war": 14,
+        "all_time_win_rate": 0.0,
+        "most_war_with_guild": "RaиkSS",
+        "total_node_wars": 91,
+        "node_won": 41,
+        "total_siege_wars": 3,
+        "siege_won": 0,
+        "currently_holding": "T3 Altar of Agris",
+        "summary_json": "{\"active_member_count\": \"48\", \"all_time_win_rate\": \"0.00%\", \"avg_cp\": \"112389\", \"currently_holding\": \"T3 Altar of Agris\", \"declared_by_other_guild\": \"11\", \"declared_on_other_guild\": \"3\", \"high_member_cp\": \"136669\", \"low_member_cp\": \"52310\", \"most_war_with_guild\": \"RaиkSS\", \"node_won\": \"41\", \"siege_won\": \"0\", \"total_cp\": \"5394685\", \"total_family_cp\": \"34787933\", \"total_node_wars\": \"91\", \"total_siege_wars\": \"3\", \"total_war\": \"14\"}",
+        "created_at": "2026-06-06T12:39:10+00:00"
+      },
+      {
+        "id": 21,
+        "retrieved_at": "2026-06-06 21:54",
+        "guild_name": "Phoenix",
+        "avg_cp": 104531.0,
+        "total_cp": 4912949,
+        "total_family_cp": 27898145,
+        "active_member_count": 47,
+        "low_member_cp": 43987,
+        "high_member_cp": 129802,
+        "declared_on_other_guild": 0,
+        "declared_by_other_guild": 0,
+        "total_war": 0,
+        "all_time_win_rate": 0.0,
+        "most_war_with_guild": null,
+        "total_node_wars": 68,
+        "node_won": 32,
+        "total_siege_wars": 9,
+        "siege_won": 3,
+        "currently_holding": "T2 Orc Camp",
+        "summary_json": "{\"active_member_count\": \"47\", \"all_time_win_rate\": \"0.00%\", \"avg_cp\": \"104531\", \"currently_holding\": \"T2 Orc Camp\", \"declared_by_other_guild\": \"0\", \"declared_on_other_guild\": \"0\", \"high_member_cp\": \"129802\", \"low_member_cp\": \"43987\", \"most_war_with_guild\": \"\", \"node_won\": \"32\", \"siege_won\": \"3\", \"total_cp\": \"4912949\", \"total_family_cp\": \"27898145\", \"total_node_wars\": \"68\", \"total_siege_wars\": \"9\", \"total_war\": \"0\"}",
+        "created_at": "2026-06-06T12:54:19+00:00"
+      },
+      {
+        "id": 22,
+        "retrieved_at": "2026-06-06 21:55",
+        "guild_name": "當惡魔遇到殺手貓",
+        "avg_cp": 102519.0,
+        "total_cp": 4920914,
+        "total_family_cp": 29825525,
+        "active_member_count": 48,
+        "low_member_cp": 53367,
+        "high_member_cp": 114776,
+        "declared_on_other_guild": 0,
+        "declared_by_other_guild": 3,
+        "total_war": 3,
+        "all_time_win_rate": 0.0,
+        "most_war_with_guild": null,
+        "total_node_wars": 24,
+        "node_won": 5,
+        "total_siege_wars": 0,
+        "siege_won": 0,
+        "currently_holding": "None",
+        "summary_json": "{\"active_member_count\": \"48\", \"all_time_win_rate\": \"0.00%\", \"avg_cp\": \"102519\", \"currently_holding\": \"None\", \"declared_by_other_guild\": \"3\", \"declared_on_other_guild\": \"0\", \"high_member_cp\": \"114776\", \"low_member_cp\": \"53367\", \"most_war_with_guild\": \"\", \"node_won\": \"5\", \"siege_won\": \"0\", \"total_cp\": \"4920914\", \"total_family_cp\": \"29825525\", \"total_node_wars\": \"24\", \"total_siege_wars\": \"0\", \"total_war\": \"3\"}",
+        "created_at": "2026-06-06T12:55:52+00:00"
+      },
+      {
+        "id": 26,
+        "retrieved_at": "2026-06-06 22:04",
+        "guild_name": "一惡人谷一",
+        "avg_cp": 101188.0,
+        "total_cp": 4958216,
+        "total_family_cp": 30282994,
+        "active_member_count": 49,
+        "low_member_cp": 81921,
+        "high_member_cp": 125720,
+        "declared_on_other_guild": 0,
+        "declared_by_other_guild": 3,
+        "total_war": 3,
+        "all_time_win_rate": 0.0,
+        "most_war_with_guild": null,
+        "total_node_wars": 50,
+        "node_won": 36,
+        "total_siege_wars": 0,
+        "siege_won": 0,
+        "currently_holding": "T1 Forsaken Lands",
+        "summary_json": "{\"active_member_count\": \"49\", \"all_time_win_rate\": \"0.00%\", \"avg_cp\": \"101188\", \"currently_holding\": \"T1 Forsaken Lands\", \"declared_by_other_guild\": \"3\", \"declared_on_other_guild\": \"0\", \"high_member_cp\": \"125720\", \"low_member_cp\": \"81921\", \"most_war_with_guild\": \"\", \"node_won\": \"36\", \"siege_won\": \"0\", \"total_cp\": \"4958216\", \"total_family_cp\": \"30282994\", \"total_node_wars\": \"50\", \"total_siege_wars\": \"0\", \"total_war\": \"3\"}",
+        "created_at": "2026-06-06T13:04:44+00:00"
+      },
+      {
+        "id": 38,
+        "retrieved_at": "2026-06-06 23:02",
+        "guild_name": "毛家村",
+        "avg_cp": 92146.0,
+        "total_cp": 4330875,
+        "total_family_cp": 25102778,
+        "active_member_count": 47,
+        "low_member_cp": 81288,
+        "high_member_cp": 114422,
+        "declared_on_other_guild": 1,
+        "declared_by_other_guild": 3,
+        "total_war": 4,
+        "all_time_win_rate": 25.0,
+        "most_war_with_guild": "RaиkSS",
+        "total_node_wars": 40,
+        "node_won": 9,
+        "total_siege_wars": 0,
+        "siege_won": 0,
+        "currently_holding": "None",
+        "summary_json": "{\"active_member_count\": \"47\", \"all_time_win_rate\": \"25.00%\", \"avg_cp\": \"92146\", \"currently_holding\": \"None\", \"declared_by_other_guild\": \"3\", \"declared_on_other_guild\": \"1\", \"high_member_cp\": \"114422\", \"low_member_cp\": \"81288\", \"most_war_with_guild\": \"RaиkSS\", \"node_won\": \"9\", \"siege_won\": \"0\", \"total_cp\": \"4330875\", \"total_family_cp\": \"25102778\", \"total_node_wars\": \"40\", \"total_siege_wars\": \"0\", \"total_war\": \"4\"}",
+        "created_at": "2026-06-06T14:02:37+00:00"
+      },
+      {
+        "id": 40,
+        "retrieved_at": "2026-06-06 23:10",
+        "guild_name": "Astrklotho",
+        "avg_cp": 90633.0,
+        "total_cp": 3987843,
+        "total_family_cp": 22970654,
+        "active_member_count": 44,
+        "low_member_cp": 62647,
+        "high_member_cp": 113761,
+        "declared_on_other_guild": 0,
+        "declared_by_other_guild": 3,
+        "total_war": 3,
+        "all_time_win_rate": 33.33,
+        "most_war_with_guild": null,
+        "total_node_wars": 24,
+        "node_won": 14,
+        "total_siege_wars": 0,
+        "siege_won": 0,
+        "currently_holding": "None",
+        "summary_json": "{\"active_member_count\": \"44\", \"all_time_win_rate\": \"33.33%\", \"avg_cp\": \"90633\", \"currently_holding\": \"None\", \"declared_by_other_guild\": \"3\", \"declared_on_other_guild\": \"0\", \"high_member_cp\": \"113761\", \"low_member_cp\": \"62647\", \"most_war_with_guild\": \"\", \"node_won\": \"14\", \"siege_won\": \"0\", \"total_cp\": \"3987843\", \"total_family_cp\": \"22970654\", \"total_node_wars\": \"24\", \"total_siege_wars\": \"0\", \"total_war\": \"3\"}",
+        "created_at": "2026-06-06T14:10:45+00:00"
+      }
+    ]
+  },
+  {
+    "name": "import_files",
+    "columns": [
+      "id",
+      "file_path",
+      "file_name",
+      "imported_at"
+    ],
+    "rows": [
+      {
+        "id": 3,
+        "file_path": "data/AlmaVivaJP/guild_AlmaVivaJP_2026-06-01.xlsx",
+        "file_name": "guild_AlmaVivaJP_2026-06-01.xlsx",
+        "imported_at": "2026-06-04 11:39:04"
+      }
+    ]
+  },
+  {
+    "name": "member_snapshots",
+    "columns": [
+      "id",
+      "retrieved_at",
+      "guild_name",
+      "rank_no",
+      "class_name",
+      "family_name",
+      "level",
+      "cpm",
+      "fcp",
+      "created_at",
+      "class_name_raw",
+      "class_name_normalized",
+      "class_name_version"
+    ],
+    "rows": [
+      {
+        "id": 3,
+        "retrieved_at": "2026-05-28 21:49",
+        "guild_name": "AlmaVivaJP",
+        "rank_no": 3,
+        "class_name": "",
+        "family_name": "everfree",
+        "level": 158,
+        "cpm": 134911,
+        "fcp": 659728,
+        "created_at": "2026-06-04 11:39:04",
+        "class_name_raw": null,
+        "class_name_normalized": null,
+        "class_name_version": null
+      },
+      {
+        "id": 53,
+        "retrieved_at": "2026-05-29 09:38",
+        "guild_name": "AlmaVivaJP",
+        "rank_no": 3,
+        "class_name": "",
+        "family_name": "everfree",
+        "level": 158,
+        "cpm": 134911,
+        "fcp": 659728,
+        "created_at": "2026-06-04 11:39:04",
+        "class_name_raw": null,
+        "class_name_normalized": null,
+        "class_name_version": null
+      },
+      {
+        "id": 103,
+        "retrieved_at": "2026-06-01 09:21",
+        "guild_name": "AlmaVivaJP",
+        "rank_no": 3,
+        "class_name": "",
+        "family_name": "ゆーはんさん",
+        "level": 161,
+        "cpm": 135658,
+        "fcp": 743764,
+        "created_at": "2026-06-04 11:39:04",
+        "class_name_raw": null,
+        "class_name_normalized": null,
+        "class_name_version": null
+      },
+      {
+        "id": 151,
+        "retrieved_at": "2026-05-29 11:32",
+        "guild_name": "Astrklotho",
+        "rank_no": 3,
+        "class_name": "",
+        "family_name": "孔雀FEH",
+        "level": 143,
+        "cpm": 111525,
+        "fcp": 697440,
+        "created_at": "2026-06-04 11:39:04",
+        "class_name_raw": null,
+        "class_name_normalized": null,
+        "class_name_version": null
+      },
+      {
+        "id": 196,
+        "retrieved_at": "2026-05-29 11:57",
+        "guild_name": "C0BRA",
+        "rank_no": 3,
+        "class_name": "",
+        "family_name": "Lötkööl",
+        "level": 130,
+        "cpm": 100062,
+        "fcp": 593243,
+        "created_at": "2026-06-04 11:39:05",
+        "class_name_raw": null,
+        "class_name_normalized": null,
+        "class_name_version": null
+      }
+    ]
+  },
+  {
+    "name": "node_history_snapshots",
+    "columns": [
+      "id",
+      "retrieved_at",
+      "guild_name",
+      "row_no",
+      "war_date",
+      "node_name",
+      "opponent_guild",
+      "result",
+      "raw_json",
+      "created_at"
+    ],
+    "rows": [
+      {
+        "id": 3,
+        "retrieved_at": "2026-06-05 10:45",
+        "guild_name": "Myst",
+        "row_no": 3,
+        "war_date": "25 May 2026",
+        "node_name": "T2 Velia Farmlands",
+        "opponent_guild": null,
+        "result": "Lost",
+        "raw_json": "{\"node_name\": \"T2 Velia Farmlands\", \"opponent_guild\": \"\", \"raw\": {\"content_name\": \"T2 Velia Farmlands\", \"date\": \"25 May 2026\", \"result\": \"Lost\"}, \"result\": \"Lost\", \"row_no\": 3, \"war_date\": \"25 May 2026\"}",
+        "created_at": "2026-06-05T01:45:33+00:00"
+      },
+      {
+        "id": 33,
+        "retrieved_at": "2026-06-05 10:50",
+        "guild_name": "Myst",
+        "row_no": 3,
+        "war_date": "25 May 2026",
+        "node_name": "T2 Velia Farmlands",
+        "opponent_guild": null,
+        "result": "Lost",
+        "raw_json": "{\"node_name\": \"T2 Velia Farmlands\", \"opponent_guild\": \"\", \"raw\": {\"content_name\": \"T2 Velia Farmlands\", \"date\": \"25 May 2026\", \"result\": \"Lost\"}, \"result\": \"Lost\", \"row_no\": 3, \"war_date\": \"25 May 2026\"}",
+        "created_at": "2026-06-05T01:50:49+00:00"
+      },
+      {
+        "id": 63,
+        "retrieved_at": "2026-06-06 21:14",
+        "guild_name": "Myst",
+        "row_no": 3,
+        "war_date": "25 May 2026",
+        "node_name": "T2 Velia Farmlands",
+        "opponent_guild": null,
+        "result": "Lost",
+        "raw_json": "{\"node_name\": \"T2 Velia Farmlands\", \"opponent_guild\": \"\", \"raw\": {\"content_name\": \"T2 Velia Farmlands\", \"date\": \"25 May 2026\", \"result\": \"Lost\"}, \"result\": \"Lost\", \"row_no\": 3, \"war_date\": \"25 May 2026\"}",
+        "created_at": "2026-06-06T12:14:33+00:00"
+      },
+      {
+        "id": 93,
+        "retrieved_at": "2026-06-06 21:16",
+        "guild_name": "AlmaVivaJP",
+        "row_no": 3,
+        "war_date": "24 May 2026",
+        "node_name": "T2 Forest of Plunder",
+        "opponent_guild": null,
+        "result": "Win",
+        "raw_json": "{\"node_name\": \"T2 Forest of Plunder\", \"opponent_guild\": \"\", \"raw\": {\"content_name\": \"T2 Forest of Plunder\", \"date\": \"24 May 2026\", \"result\": \"Win\"}, \"result\": \"Win\", \"row_no\": 3, \"war_date\": \"24 May 2026\"}",
+        "created_at": "2026-06-06T12:16:03+00:00"
+      },
+      {
+        "id": 122,
+        "retrieved_at": "2026-06-06 21:17",
+        "guild_name": "TRAITORs",
+        "row_no": 3,
+        "war_date": "22 May 2026",
+        "node_name": "T2 Orc Camp",
+        "opponent_guild": null,
+        "result": "Win",
+        "raw_json": "{\"node_name\": \"T2 Orc Camp\", \"opponent_guild\": \"\", \"raw\": {\"content_name\": \"T2 Orc Camp\", \"date\": \"22 May 2026\", \"result\": \"Win\"}, \"result\": \"Win\", \"row_no\": 3, \"war_date\": \"22 May 2026\"}",
+        "created_at": "2026-06-06T12:17:21+00:00"
+      },
+      {
+        "id": 151,
+        "retrieved_at": "2026-06-06 21:19",
+        "guild_name": "・殺戮・",
+        "row_no": 3,
+        "war_date": "31 May 2026",
+        "node_name": "T3 Dernyl Farm",
+        "opponent_guild": null,
+        "result": "Lost",
+        "raw_json": "{\"node_name\": \"T3 Dernyl Farm\", \"opponent_guild\": \"\", \"raw\": {\"content_name\": \"T3 Dernyl Farm\", \"date\": \"31 May 2026\", \"result\": \"Lost\"}, \"result\": \"Lost\", \"row_no\": 3, \"war_date\": \"31 May 2026\"}",
+        "created_at": "2026-06-06T12:19:58+00:00"
+      },
+      {
+        "id": 181,
+        "retrieved_at": "2026-06-06 21:22",
+        "guild_name": "VainqueurJP",
+        "row_no": 3,
+        "war_date": "24 May 2026",
+        "node_name": "T2 Cursed Lands",
+        "opponent_guild": null,
+        "result": "Win",
+        "raw_json": "{\"node_name\": \"T2 Cursed Lands\", \"opponent_guild\": \"\", \"raw\": {\"content_name\": \"T2 Cursed Lands\", \"date\": \"24 May 2026\", \"result\": \"Win\"}, \"result\": \"Win\", \"row_no\": 3, \"war_date\": \"24 May 2026\"}",
+        "created_at": "2026-06-06T12:22:49+00:00"
+      }
+    ]
+  },
+  {
+    "name": "pv_identity_links",
+    "columns": [
+      "id",
+      "old_date",
+      "new_date",
+      "old_family_name",
+      "old_guild_name",
+      "new_family_name",
+      "new_guild_name",
+      "old_pv_file",
+      "new_pv_file",
+      "link_type",
+      "linked_at",
+      "note"
+    ],
+    "rows": [
+      {
+        "id": 3,
+        "old_date": "20260529",
+        "new_date": "20260606",
+        "old_family_name": "DiedVirgln",
+        "old_guild_name": "Maverickz",
+        "new_family_name": "DiedVirgln",
+        "new_guild_name": "Myst",
+        "old_pv_file": "D:\\bdm-guild-karte\\deta_PV\\Maverickz_DiedVirgln.xlsx",
+        "new_pv_file": "D:\\bdm-guild-karte\\deta_PV\\Myst_DiedVirgln.xlsx",
+        "link_type": "guild_transfer",
+        "linked_at": "2026-06-08T12:35:17",
+        "note": ""
+      }
+    ]
+  },
+  {
+    "name": "pv_lost_tracks",
+    "columns": [
+      "id",
+      "lost_date",
+      "family_name",
+      "guild_name",
+      "previous_pv_file",
+      "moved_to",
+      "created_at",
+      "note"
+    ],
+    "rows": [
+      {
+        "id": 3,
+        "lost_date": "20260606",
+        "family_name": "Moyo",
+        "guild_name": "ーEspoirー",
+        "previous_pv_file": "",
+        "moved_to": "D:\\bdm-guild-karte\\deta_PV\\追跡不明\\20260606\\ーEspoirー_Moyo.xlsx",
+        "created_at": "2026-06-08T12:58:46",
+        "note": ""
+      }
+    ]
+  }
+]
+
+## PVカルテ由来の推移情報
+{
+  "record_count": 0,
+  "latest_rows": [],
+  "growth_top": [],
+  "stagnant_or_decline": []
+}
+
+## ギルドファイル由来の情報
+[]
+
+## AIへの作文指示
+- 上記の材料だけを使って、このギルド専用の自然な日本語コメントを作成してください。
+- 数字が不足している項目は断定せず、情報不足として扱ってください。
+- 良い点、注意点、次に見るべき点が分かる文章にしてください。
+- 出力は指定されたJSON形式だけにしてください。
