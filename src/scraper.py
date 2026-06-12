@@ -33,7 +33,16 @@ DBONK_LOGIN_URL = "https://dbonk.com/bdmbsmv2/index.php"
 RESULT_TIMEOUT_SECONDS = 40
 GUILD_LOAD_TIMEOUT_SECONDS = 60
 POLL_INTERVAL_SECONDS = 0.5
+# ギルド名クリック後、詳細画面へ切り替わるまでの待ち時間。
+# サーバー応答が遅く30秒以上かかることがあるため広めに取る。
+DETAIL_TRANSITION_TIMEOUT_SECONDS = 60
+# クリックで切り替えが始まったか（Loading Data 表示やランキング離脱）を判定する初期猶予。
+# この時間内に何の兆候も無ければ誤クリックとみなし、素早く次の候補へ回す。
+DETAIL_CLICK_GRACE_SECONDS = 8
 DEBUG_SAVE_FILES = False
+# 各ランキング行のパース結果を逐次 print するか。
+# 34ギルド×複数ページ分が毎回出力され、2時間分のログが膨大になるため通常はオフ。
+DEBUG_ROW_LOG = False
 
 
 @dataclass
@@ -474,7 +483,8 @@ def find_exact_row_on_current_page(page: Page, guild_name: str) -> Locator | Non
         if not parsed:
             continue
         rank, name = parsed
-        print(f"row parsed: rank={rank}, name={name}")
+        if DEBUG_ROW_LOG:
+            print(f"row parsed: rank={rank}, name={name}")
         if name == guild_name:
             exact_row = row
             break
@@ -493,20 +503,42 @@ def parse_ranking_row(row_text: str) -> tuple[str, str] | None:
 
 def wait_for_guild_detail_transition(page: Page, guild_name: str) -> bool:
     start = time.monotonic()
-    while time.monotonic() - start < 15:
-        body = page.locator("body").inner_text()
-        has_detail_keywords = (
-            ("Guild Combat Power" in body)
-            or ("Combat Power" in body)
-            or ("Server Origin" in body)
-            or ("Active Guild Members" in body)
+    next_log = start + 5
+    transition_started = False
+    while time.monotonic() - start < DETAIL_TRANSITION_TIMEOUT_SECONDS:
+        # 判定はブラウザ内で行い、必要なフラグだけ受け取る（全文転送を避ける）。
+        state = page.evaluate(
+            """(guildName) => {
+                const body = document.body.innerText;
+                return {
+                    detail: body.includes('Guild Combat Power')
+                        || body.includes('Combat Power')
+                        || body.includes('Server Origin')
+                        || body.includes('Active Guild Members'),
+                    guildRank: body.includes('Guild Rank'),
+                    guildName: body.includes(guildName),
+                    loading: body.includes('Loading Data'),
+                };
+            }""",
+            guild_name,
         )
-        guild_rank_visible = "Guild Rank" in body
-        guild_name_visible = guild_name in body
-        if has_detail_keywords:
+        if state["detail"]:
             return True
-        if (not guild_rank_visible) and guild_name_visible:
+        if (not state["guildRank"]) and state["guildName"]:
             return True
+        # 「Loading Data」表示やランキング画面からの離脱は、クリックが効いて
+        # 詳細ページへの切り替えが始まった証拠。ここからはロードが30秒以上
+        # かかっても DETAIL_TRANSITION_TIMEOUT_SECONDS まで粘って待つ。
+        if state["loading"] or not state["guildRank"]:
+            transition_started = True
+        # 切り替わりの兆候が全く無いまま猶予を過ぎた場合は誤クリックとみなし、
+        # 早めに諦めて次の候補へ回す（失敗時に各候補で長時間待つのを防ぐ）。
+        if not transition_started and time.monotonic() - start >= DETAIL_CLICK_GRACE_SECONDS:
+            return False
+        if transition_started and time.monotonic() >= next_log:
+            elapsed = int(time.monotonic() - start)
+            print(f"ギルド詳細画面の読み込みを待機中... ({elapsed}秒経過)")
+            next_log += 5
         time.sleep(POLL_INTERVAL_SECONDS)
     return False
 
@@ -612,8 +644,10 @@ def click_row_and_wait_for_detail(page: Page, row: Locator, guild_name: str) -> 
 
 
 def click_exact_guild_from_ranking(page: Page, guild_name: str) -> None:
+    search_pages = [1, 2, 3, 4]
+    page_range_label = f"1〜{search_pages[-1]}"
     checked_rows: List[str] = []
-    for page_no in [1, 2, 3, 4]:
+    for page_no in search_pages:
         print(f"Guild Ranking {page_no}ページ目を検索中...")
         if page_no != 1:
             if not click_ranking_page(page, page_no):
@@ -629,7 +663,7 @@ def click_exact_guild_from_ranking(page: Page, guild_name: str) -> None:
             if click_row_and_wait_for_detail(page, target_row, guild_name):
                 return
 
-    print("Guild Ranking 候補行（1〜3ページ確認分）:")
+    print(f"Guild Ranking 候補行（{page_range_label}ページ確認分）:")
     for text in checked_rows:
         print(f"  - {text}")
     DATA_DIR.mkdir(parents=True, exist_ok=True)
@@ -637,7 +671,9 @@ def click_exact_guild_from_ranking(page: Page, guild_name: str) -> None:
     (DATA_DIR / "debug_after_search_text.txt").write_text(
         page.locator("body").inner_text(), encoding="utf-8"
     )
-    raise RuntimeError(f"Guild Ranking 1〜3ページで '{guild_name}' 完全一致行をクリックできませんでした。")
+    raise RuntimeError(
+        f"Guild Ranking {page_range_label}ページで '{guild_name}' 完全一致行をクリックできませんでした。"
+    )
 
 
 def get_scroll_metrics(page: Page) -> tuple[int, int]:
@@ -648,9 +684,18 @@ def wait_for_active_members_ready(page: Page) -> None:
     start = time.monotonic()
     next_log = start + 5
     while time.monotonic() - start < GUILD_LOAD_TIMEOUT_SECONDS:
-        body_text = page.locator("body").inner_text()
-        has_loading = "Loading Data" in body_text
-        has_active_members = "Active Guild Members" in body_text
+        # 全文転送を避け、必要な2フラグだけをブラウザ側で計算して受け取る（判定は同一）。
+        state = page.evaluate(
+            """() => {
+                const body = document.body.innerText;
+                return {
+                    loading: body.includes('Loading Data'),
+                    active: body.includes('Active Guild Members'),
+                };
+            }"""
+        )
+        has_loading = state["loading"]
+        has_active_members = state["active"]
         if not has_loading and has_active_members:
             print("Active Guild Members の表示を確認しました。")
             return
@@ -663,14 +708,29 @@ def wait_for_active_members_ready(page: Page) -> None:
             )
             next_log += 5
         time.sleep(POLL_INTERVAL_SECONDS)
-    raise RuntimeError("60秒以内に Active Guild Members が表示されませんでした。")
+    raise RuntimeError(
+        f"{GUILD_LOAD_TIMEOUT_SECONDS}秒以内に Active Guild Members が表示されませんでした。"
+    )
 
 
 def has_member_signals(page: Page) -> bool:
-    active_text = extract_active_members_text(page.locator("body").inner_text())
-    if not active_text:
-        return False
-    return ("CPM" in active_text) or ("FCP" in active_text) or ("Lv" in active_text)
+    # extract_active_members_text と同じ切り出し条件をブラウザ側で評価し、
+    # スクロール毎の body.inner_text() 全文転送を避ける。
+    return bool(
+        page.evaluate(
+            """() => {
+                const body = document.body.innerText;
+                const start = body.indexOf('Active Guild Members');
+                if (start === -1) return false;
+                let section = body.slice(start);
+                const end = section.indexOf('Guild Member History');
+                if (end !== -1) section = section.slice(0, end);
+                return section.includes('CPM')
+                    || section.includes('FCP')
+                    || section.includes('Lv');
+            }"""
+        )
+    )
 
 
 def scroll_until_member_section(page: Page) -> None:
@@ -687,7 +747,9 @@ def scroll_until_member_section(page: Page) -> None:
         if time.monotonic() >= next_log:
             print(f"メンバー一覧待機中... ({int(time.monotonic()-start)}秒経過)")
             next_log += 5
-    raise RuntimeError("30秒以内にメンバー一覧候補を検出できませんでした。")
+    raise RuntimeError(
+        f"{RESULT_TIMEOUT_SECONDS}秒以内にメンバー一覧候補を検出できませんでした。"
+    )
 
 
 def collect_horizontal_texts(page: Page) -> List[str]:
@@ -1227,7 +1289,11 @@ def main() -> int:
             print(f"✅ 全処理終了: {ok}/{total} ギルドの取得が完了しました。")
             return 0
         finally:
-            input("確認したらEnterで終了")
+            # コンソールから直接実行したときだけ Enter 待ちにする。
+            # GUI(app.py)は QProcess 経由で起動し stdin が無いため、
+            # 無条件に input() するとここで永久にブロックし「実行中」のまま固まる。
+            if sys.stdin is not None and sys.stdin.isatty():
+                input("確認したらEnterで終了")
             ctx.close()
             browser.close()
 
