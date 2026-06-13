@@ -26,6 +26,7 @@ COG_EXTENSIONS = (
     "bot.cogs.ogre_timer",
     "bot.cogs.admin",
     "bot.cogs.ai_talk",
+    "bot.cogs.mini_game",
 )
 
 
@@ -46,6 +47,8 @@ class KarteDiscordBot(commands.Bot):
 
     def __init__(self) -> None:
         intents = discord.Intents.default()
+        # ミニゲームのプレフィックスコマンド (!hunt 等) に必要
+        intents.message_content = True
         super().__init__(command_prefix="!", intents=intents)
         self.startup_notified = False
 
