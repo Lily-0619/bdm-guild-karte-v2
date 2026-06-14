@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import html
 import subprocess
 import sys
 
@@ -394,6 +395,8 @@ class LauncherWindow(QMainWindow):
         process.setProcessChannelMode(QProcess.ProcessChannelMode.SeparateChannels)
         env = QProcessEnvironment.systemEnvironment()
         env.insert("PYTHONIOENCODING", "utf-8")
+        # 子プロセスの標準出力をバッファせず、ログをリアルタイムに表示する。
+        env.insert("PYTHONUNBUFFERED", "1")
         process.setProcessEnvironment(env)
         process.readyReadStandardOutput.connect(self.read_stdout)
         process.readyReadStandardError.connect(self.read_stderr)
@@ -470,8 +473,27 @@ class LauncherWindow(QMainWindow):
             self.log_view.append("")
             return
         for line in text.splitlines():
-            self.log_view.append(line)
+            color = self._log_line_color(line)
+            if color:
+                self.log_view.append(
+                    f'<span style="color:{color}; font-weight:bold;">'
+                    f"{html.escape(line)}</span>"
+                )
+            else:
+                self.log_view.append(line)
         self.log_view.moveCursor(QTextCursor.MoveOperation.End)
+
+    @staticmethod
+    def _log_line_color(line: str) -> str | None:
+        """ギルド取得の進捗ログを見やすくするための行カラーを返す。"""
+        stripped = line.lstrip()
+        if stripped.startswith(("✅", "[OK]")):
+            return "#1B7F3B"  # 成功: 緑
+        if stripped.startswith(("❌", "⚠", "[ERROR]", "[FAILED]")):
+            return "#C0392B"  # 失敗/警告: 赤
+        if stripped.startswith(("▶", "[START]", "=====", "==========")):
+            return "#1F5FAF"  # 開始/区切り: 青
+        return None
 
 
 def is_python_executable_usable(path) -> bool:
