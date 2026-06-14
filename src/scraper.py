@@ -284,6 +284,85 @@ def is_on_guild_ranking_page(page: Page) -> bool:
     return False
 
 
+def is_on_guild_ranking_page_strict(page: Page) -> bool:
+    """Confirm we landed on Guild Ranking by its header, not just any Search box.
+
+    Enhancement など別ページにも検索欄があり is_on_guild_ranking_page では
+    取り違えるため、メニュークリック後の確認にはこの厳密版を使う。
+    """
+    try:
+        return page.get_by_text(
+            re.compile(r"^\s*Guild Rank\s*$", re.I)
+        ).first.is_visible()
+    except Exception:
+        return False
+
+
+# 左メニューの他項目。Guild Ranking 行を特定する際、これらを含む要素
+# （＝メニュー全体の巨大コンテナや別項目）を誤クリックしないよう除外する。
+OTHER_MENU_LABELS = (
+    "Player Ranking",
+    "Node Holder",
+    "Enhancement",
+    "Loot Stats",
+    "Guild Management",
+    "Discord Bot",
+    "Server Stats",
+    "Bookmarks",
+    "Faqs",
+    "Asia Menu",
+)
+
+
+def _normalize_text(text: str) -> str:
+    return re.sub(r"\s+", " ", text or "").strip()
+
+
+def find_guild_ranking_menu_item(page: Page) -> Locator | None:
+    """左メニューの「Guild Ranking」行そのもの（最小のクリック要素）を返す。
+
+    'Guild Ranking' を含むだけの大きなコンテナをクリックすると中心座標が
+    Enhancement 等の別項目に当たり誤遷移するため、
+      - テキストに 'Guild Ranking' を含む
+      - 他メニュー項目名を含まない（＝メニュー全体ではない）
+      - テキストが短い（アイコン名の接頭辞程度は許容）
+    要素のうち、最も面積の小さいものを選ぶ。
+    """
+    candidates = page.locator(
+        ":is(a,button,li,span,div,p,[role='button'],[role='link'],[role='menuitem'])"
+    )
+    matches: list[tuple[float, Locator, str, dict]] = []
+    try:
+        count = min(candidates.count(), 400)
+    except Exception:
+        count = 0
+    for i in range(count):
+        el = candidates.nth(i)
+        try:
+            if not el.is_visible():
+                continue
+            text = _normalize_text(el.inner_text())
+            if "Guild Ranking" not in text:
+                continue
+            if len(text) > 40:
+                continue
+            if any(other in text for other in OTHER_MENU_LABELS):
+                continue
+            box = el.bounding_box()
+            if not box:
+                continue
+            area = box.get("width", 0) * box.get("height", 0)
+            matches.append((area, el, text, box))
+        except Exception:
+            continue
+    if not matches:
+        return None
+    matches.sort(key=lambda m: m[0])
+    area, el, text, box = matches[0]
+    print(f"Guild Ranking メニュー項目を特定: text='{text}', box={box}")
+    return el
+
+
 def open_left_menu(page: Page) -> None:
     toggles = [
         page.locator("button:has-text('menu')"),
@@ -317,55 +396,69 @@ def open_left_menu(page: Page) -> None:
             continue
 
 
+GUILD_RANKING_OPEN_ATTEMPTS = 3
+# クリック後、Guild Ranking のヘッダーが出るかを確認する待ち時間（短め）。
+# ここで出なければ別ページ（Enhancement等）を誤って開いた可能性が高いので
+# メニューを開き直して再試行する。
+GUILD_RANKING_CONFIRM_SECONDS = 12
+
+
 def open_guild_ranking_page(page: Page) -> None:
-    if is_on_guild_ranking_page(page):
+    if is_on_guild_ranking_page_strict(page):
         return
 
-    close_general_chat_panel(page)
-    open_left_menu(page)
-    candidates = [
-        page.get_by_text("Guild Ranking", exact=True),
-        page.locator(":is(a,button,div,span,li):has-text('Guild Ranking')"),
-        page.locator("text=Guild Ranking").locator("xpath=parent::*"),
-        page.locator("text=Guild Ranking").locator(
-            "xpath=ancestor::*[self::a or self::button or self::div or self::span or self::li][1]"
-        ),
-    ]
-    clicked = False
-    for c in candidates:
-        try:
-            limit = min(c.count(), 10)
-            for i in range(limit):
-                item = c.nth(i)
-                if item.is_visible():
-                    item.click(timeout=3000)
-                    clicked = True
-                    break
-            if clicked:
-                break
-        except Exception:
-            continue
-    if not clicked:
-        DATA_DIR.mkdir(parents=True, exist_ok=True)
-        page.screenshot(path=str(DATA_DIR / "debug_guild_ranking_menu.png"), full_page=True)
-        body_text = page.locator("body").inner_text()
-        (DATA_DIR / "debug_guild_ranking_menu_text.txt").write_text(
-            body_text, encoding="utf-8"
-        )
-        print("左メニュー内テキスト候補（先頭100行）:")
-        for line in [ln.strip() for ln in body_text.splitlines() if ln.strip()][:100]:
-            print(f"  - {line}")
-        raise RuntimeError("左メニューの Guild Ranking をクリックできませんでした。")
+    last_error = ""
+    for attempt in range(1, GUILD_RANKING_OPEN_ATTEMPTS + 1):
+        close_general_chat_panel(page)
+        open_left_menu(page)
 
-    start = time.monotonic()
-    while time.monotonic() - start < RESULT_TIMEOUT_SECONDS:
+        item = find_guild_ranking_menu_item(page)
+        if item is None:
+            last_error = "メニュー内に Guild Ranking 項目が見つかりません。"
+            print(f"⚠ {last_error}（試行 {attempt}/{GUILD_RANKING_OPEN_ATTEMPTS}）")
+            page.wait_for_timeout(800)
+            continue
+
         try:
-            if is_on_guild_ranking_page(page):
+            print(
+                f"Guild Ranking をクリックします（試行 {attempt}/{GUILD_RANKING_OPEN_ATTEMPTS}）"
+            )
+            item.click(timeout=3000)
+        except Exception as exc:
+            last_error = f"Guild Ranking クリックに失敗: {exc}"
+            print(f"⚠ {last_error}（試行 {attempt}/{GUILD_RANKING_OPEN_ATTEMPTS}）")
+            page.wait_for_timeout(800)
+            continue
+
+        # クリック後、Guild Ranking ヘッダーが出るかを確認。
+        # 出なければ別ページを誤って開いたとみなし、メニューを開き直して再試行。
+        confirm_start = time.monotonic()
+        while time.monotonic() - confirm_start < GUILD_RANKING_CONFIRM_SECONDS:
+            if is_on_guild_ranking_page_strict(page):
+                # ヘッダー確認後、検索欄が使える状態になるまで少し待つ。
+                ready_start = time.monotonic()
+                while time.monotonic() - ready_start < RESULT_TIMEOUT_SECONDS:
+                    if is_on_guild_ranking_page(page):
+                        return
+                    time.sleep(POLL_INTERVAL_SECONDS)
                 return
-        except Exception:
-            pass
-        time.sleep(POLL_INTERVAL_SECONDS)
-    raise RuntimeError("Guild Ranking 画面の読み込み待機に失敗しました。")
+            time.sleep(POLL_INTERVAL_SECONDS)
+
+        last_error = "クリック後に Guild Ranking 画面を確認できませんでした（別ページを開いた可能性）。"
+        print(f"⚠ {last_error} 再試行します（試行 {attempt}/{GUILD_RANKING_OPEN_ATTEMPTS}）")
+
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+    page.screenshot(path=str(DATA_DIR / "debug_guild_ranking_menu.png"), full_page=True)
+    body_text = page.locator("body").inner_text()
+    (DATA_DIR / "debug_guild_ranking_menu_text.txt").write_text(
+        body_text, encoding="utf-8"
+    )
+    print("左メニュー内テキスト候補（先頭100行）:")
+    for line in [ln.strip() for ln in body_text.splitlines() if ln.strip()][:100]:
+        print(f"  - {line}")
+    raise RuntimeError(
+        f"左メニューの Guild Ranking を開けませんでした（{GUILD_RANKING_OPEN_ATTEMPTS}回試行）: {last_error}"
+    )
 
 
 def search_guild_in_ranking(page: Page, guild_name: str) -> None:
@@ -1244,6 +1337,14 @@ def main() -> int:
         sync_playwright,
     )
 
+    # GUI(app.py)から QProcess 経由で起動された場合、stdout はパイプになり
+    # ブロックバッファリングのせいでログが最後にまとめて出てしまう。
+    # 行バッファリングにして、ギルドごとの進捗をリアルタイムに表示する。
+    try:
+        sys.stdout.reconfigure(line_buffering=True)
+    except Exception:
+        pass
+
     ensure_dirs()
     load_project_env(ENV_PATH)
 
@@ -1262,31 +1363,65 @@ def main() -> int:
         try_select_asia_server(page)
         page.wait_for_timeout(1000)
         total, ok = len(guilds), 0
+        succeeded: list[tuple[str, int]] = []
+        failed: list[tuple[str, str]] = []
         try:
             for i, guild in enumerate(guilds, 1):
-                print(f"[{i}/{total}] {guild} ... 取得中")
+                print("")
+                print(f"▶ [{i}/{total}] 「{guild}」 取得開始")
                 try:
                     search_and_open_guild(page, guild)
                     members = scrape_members_from_guild_page(page)
                     body_text = page.locator("body").inner_text()
                     workbook_path = save_guild_workbook(guild, members, body_text)
                     save_guild_snapshot_to_sqlite(guild, members, body_text)
-                    print(f"取得メンバー数: {len(members)}")
+                    print(f"  取得メンバー数: {len(members)}人")
                     expected_count = parse_expected_active_member_count(body_text)
                     if expected_count is not None and expected_count != len(members):
                         print(
-                            f"⚠ 表示上のActive Memberは{expected_count}人ですが、"
-                            f"CSV取得は{len(members)}人です"
+                            f"  ⚠ 表示上のActive Memberは{expected_count}人ですが、"
+                            f"取得は{len(members)}人です"
                         )
                     ok += 1
-                    print(f"[{i}/{total}] {guild} ... 取得完了 -> {workbook_path}")
+                    succeeded.append((guild, len(members)))
+                    print(
+                        f"✅ [{i}/{total}] 「{guild}」 取得成功（{len(members)}人） "
+                        f"-> {workbook_path}"
+                    )
                     if i < total:
                         return_to_guild_ranking(page)
                 except (PlaywrightTimeoutError, RuntimeError) as e:
-                    print(f"[{i}/{total}] {guild} ... エラー: {e}")
+                    failed.append((guild, str(e)))
+                    print(f"❌ [{i}/{total}] 「{guild}」 取得失敗: {e}")
+                    # 失敗しても次のギルドへ進めるよう、ランキング画面へ戻しておく。
+                    if i < total:
+                        try:
+                            return_to_guild_ranking(page)
+                        except Exception as recover_exc:
+                            print(f"  ⚠ ランキング画面への復帰に失敗: {recover_exc}")
                 except Exception as e:
-                    print(f"[{i}/{total}] {guild} ... 想定外エラー: {e}")
-            print(f"✅ 全処理終了: {ok}/{total} ギルドの取得が完了しました。")
+                    failed.append((guild, f"想定外エラー: {e}"))
+                    print(f"❌ [{i}/{total}] 「{guild}」 想定外エラー: {e}")
+                    if i < total:
+                        try:
+                            return_to_guild_ranking(page)
+                        except Exception as recover_exc:
+                            print(f"  ⚠ ランキング画面への復帰に失敗: {recover_exc}")
+
+            print("")
+            print("========== 取得結果サマリー ==========")
+            print(f"成功: {ok}/{total} ギルド")
+            if succeeded:
+                print(f"✅ 成功したギルド ({len(succeeded)}):")
+                for name, count in succeeded:
+                    print(f"   - {name}（{count}人）")
+            if failed:
+                print(f"❌ 失敗したギルド ({len(failed)}):")
+                for name, reason in failed:
+                    print(f"   - {name}: {reason}")
+            else:
+                print("❌ 失敗したギルド: なし")
+            print("=====================================")
             return 0
         finally:
             # コンソールから直接実行したときだけ Enter 待ちにする。
