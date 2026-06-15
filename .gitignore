@@ -29,3 +29,6 @@ Thumbs.db
 *.tmp
 *.bak
 ~$*
+
+# Collection session state (runtime only)
+data/.session.json

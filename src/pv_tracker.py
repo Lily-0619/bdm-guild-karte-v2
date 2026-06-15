@@ -176,11 +176,91 @@ class PVTracker:
             return []
         return sorted(path.name for path in self.data_dir.iterdir() if path.is_dir())
 
+    def summary_path_for_date(self, date_value: str) -> Path | None:
+        """Return the summary workbook whose date matches ``date_value``."""
+
+        target_date = normalize_date(date_value)
+        if not target_date or not self.analysis_dir.exists():
+            return None
+        for path in self.analysis_dir.glob("summary_*.xlsx"):
+            if normalize_date(path.stem.replace("summary_", "")) == target_date:
+                return path
+        return None
+
+    def read_summary_guild_rows(self, summary_path: Path) -> list[dict[str, str]]:
+        """Read guild_name / source_file pairs from a summary workbook."""
+
+        from openpyxl import load_workbook
+
+        workbook = load_workbook(summary_path, data_only=True, read_only=True)
+        try:
+            if "guild_metrics" not in workbook.sheetnames:
+                return []
+            sheet = workbook["guild_metrics"]
+            header = next(sheet.iter_rows(min_row=1, max_row=1, values_only=True), ())
+            headers = [str(value).strip() if value is not None else "" for value in header]
+            try:
+                name_col = headers.index("guild_name")
+                source_col = headers.index("source_file")
+            except ValueError:
+                return []
+            rows: list[dict[str, str]] = []
+            for row in sheet.iter_rows(min_row=2, values_only=True):
+                guild_name = value_at(row, name_col)
+                source_file = value_at(row, source_col)
+                if guild_name in (None, ""):
+                    continue
+                rows.append(
+                    {
+                        "guild_name": str(guild_name).strip(),
+                        "source_file": str(source_file).strip() if source_file not in (None, "") else "",
+                    }
+                )
+            return rows
+        finally:
+            workbook.close()
+
+    def list_guild_names_for_summary(self, date_value: str) -> list[str]:
+        """Return guild names included in the summary for ``date_value``."""
+
+        summary_path = self.summary_path_for_date(date_value)
+        if summary_path is None:
+            return []
+        names = {row["guild_name"] for row in self.read_summary_guild_rows(summary_path)}
+        return sorted(names)
+
     def load_members_for_date(self, date_value: str) -> list[MemberRecord]:
         target_date = normalize_date(date_value)
-        records: list[MemberRecord] = []
+        summary_path = self.summary_path_for_date(target_date)
+        if summary_path is not None:
+            records = self.load_members_from_summary(summary_path, target_date)
+            if records:
+                return records
+        # サマリーが無い / source_file が無い旧データはファイル名一致で探す。
+        records = []
         for workbook_path in self.find_guild_workbooks(target_date):
             records.extend(self.read_members_workbook(workbook_path, target_date))
+        return records
+
+    def load_members_from_summary(self, summary_path: Path, date_value: str) -> list[MemberRecord]:
+        """Load member records using the exact files recorded in the summary.
+
+        Managing by summary date this way means a guild collected after midnight
+        (whose workbook filename carries a different date) is still found, because
+        the summary points to its actual source file.
+        """
+
+        records: list[MemberRecord] = []
+        for row in self.read_summary_guild_rows(summary_path):
+            source_file = row["source_file"]
+            if not source_file:
+                continue
+            workbook_path = Path(source_file)
+            if not workbook_path.is_absolute():
+                workbook_path = self.base_dir / workbook_path
+            if not workbook_path.exists():
+                continue
+            records.extend(self.read_members_workbook(workbook_path, date_value))
         return records
 
     def find_guild_workbooks(self, date_value: str) -> list[Path]:
