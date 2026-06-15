@@ -195,8 +195,11 @@ def generate_comments(
                 errors.append(warning)
                 skip_ai = True  # 全ギルドが同じ失敗を繰り返すのを避ける
 
-    for record in records:
+    total = len(records)
+    for index, record in enumerate(records, start=1):
         guild_name = record["guild_name"]
+        # GUIが進捗バー/残り時間に使う機械可読の進捗行（順序: 番号/総数 ギルド名）。
+        print(f"[進捗] {index}/{total} {guild_name}", flush=True)
         if skip_ai:
             comments[guild_name] = empty_comment(guild_name)
             continue
