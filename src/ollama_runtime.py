@@ -132,6 +132,48 @@ def _canonical_model(name: str) -> str:
     return name if ":" in name else f"{name}:latest"
 
 
+def warm_model(
+    model: str,
+    base_url: str = DEFAULT_BASE_URL,
+    *,
+    keep_alive: str = "30m",
+    wait_sec: int = 30,
+    timeout: float = 300.0,
+    log=print,
+) -> tuple[bool, str]:
+    """Start the server (if needed) and load ``model`` into memory.
+
+    Sends a tiny 1-token request with ``keep_alive`` so the model stays resident
+    in the Ollama server.  Because the server is a separate long-lived process,
+    the model remains warm after this caller exits, making the first real
+    generation call fast.  Best effort: returns ``(ok, message)``.
+    """
+    ok, message = ensure_running(base_url, wait_sec=wait_sec, log=log)
+    if not ok:
+        return False, message
+    if model and not has_model(model, base_url):
+        return False, f"モデル '{model}' が未取得のためウォームアップをスキップしました。"
+
+    payload = {
+        "model": model,
+        "messages": [{"role": "user", "content": "ok"}],
+        "stream": False,
+        "keep_alive": keep_alive,
+        "options": {"num_predict": 1},
+    }
+    request = urllib.request.Request(
+        f"{base_url.rstrip('/')}/api/chat",
+        data=json.dumps(payload).encode("utf-8"),
+        headers={"Content-Type": "application/json"},
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=timeout):
+            return True, f"モデル '{model}' をウォームアップしました。"
+    except (urllib.error.URLError, OSError) as exc:
+        return False, f"ウォームアップに失敗しました: {exc}"
+
+
 def has_model(model: str, base_url: str = DEFAULT_BASE_URL) -> bool:
     """Return True if exactly ``model`` is installed.
 
