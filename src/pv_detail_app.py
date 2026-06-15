@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime
 from pathlib import Path
 import os
 import queue
@@ -16,7 +15,7 @@ import tkinter as tk
 from tkinter import messagebox, ttk
 
 from .pv_tracker import ManualCandidate, MemberRecord, PVTracker, format_record_label
-from .paths import ANALYSIS_DIR, AUTOCOMMENT_DIR, BACKDESIGN_PATH, PROJECT_ROOT, SRC_DIR, ensure_dirs
+from .paths import BACKDESIGN_PATH, PROJECT_ROOT, SRC_DIR, ensure_dirs
 
 
 BACKGROUND_IMAGE = BACKDESIGN_PATH
@@ -191,8 +190,6 @@ class PVDetailApp(tk.Tk):
         self.new_combo.grid(row=0, column=3, padx=4)
         self.new_combo.bind("<<ComboboxSelected>>", lambda _event: self._refresh_guild_checklist())
         ttk.Button(controls, text="Start", command=self.start_analysis, style="Accent.TButton").grid(row=0, column=4, padx=10)
-        ttk.Button(controls, text="更新", command=self.refresh_inputs, style="Soft.TButton").grid(row=0, column=5, padx=4)
-        ttk.Button(controls, text="原文作成", command=self.create_comment_materials, style="Soft.TButton").grid(row=0, column=7, padx=4)
         ttk.Button(controls, text="コメント作成", command=self.run_comments, style="Accent.TButton").grid(row=0, column=8, padx=4)
         ttk.Button(controls, text="PNG作成", command=self.run_make_card, style="Accent.TButton").grid(row=0, column=9, padx=(4, 0))
 
@@ -478,93 +475,6 @@ class PVDetailApp(tk.Tk):
         self.selected_old_var.set("-")
         self.selected_new_var.set("-")
 
-
-    def create_comment_materials(self) -> None:
-        output_dir = AUTOCOMMENT_DIR / (self.new_date_var.get().replace("-", "").replace("_", "") or datetime.now().strftime("%Y%m%d"))
-        output_dir.mkdir(parents=True, exist_ok=True)
-        old_records = self._records_from_listbox(self.old_list, self.old_record_by_list_label)
-        new_records = self._records_from_listbox(self.new_list, self.new_record_by_list_label)
-        transfer_candidates = self._transfer_candidates_from_listbox()
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        old_date = self.old_date_var.get() or "old"
-        new_date = self.new_date_var.get() or "new"
-        output_path = output_dir / f"autocomment_material_{new_date}_{timestamp}.txt"
-        lines = [
-            "# コメント材料",
-            "",
-            f"作成日時: {datetime.now().isoformat(timespec='seconds')}",
-            f"旧データ: {old_date}",
-            f"新データ: {new_date}",
-            "",
-        ]
-        if self.current_result is not None:
-            lines.extend([
-                "## 自動処理サマリー",
-                f"完全一致: {len(self.current_result.exact_matches)}件",
-                f"新規作成済み: {len(self.current_result.new_players)}件",
-                f"名前不一致(旧): {len(self.current_result.name_mismatches_old)}件",
-                f"名前不一致(新): {len(self.current_result.name_mismatches_new)}件",
-                f"移籍候補: {len(self.current_result.transfer_candidates)}件",
-                f"追跡不明候補: {len(self.current_result.lost_candidates)}件",
-                f"PVカルテに追記した人数: {len(self.current_result.exact_matches) + self.manual_link_count}件",
-                f"追跡不明へ送った人数: {self.last_moved_lost_count}件",
-                f"新規として作成した人数: {len(self.current_result.new_players) + self.last_created_new_count}件",
-                "",
-                "## 処理対象ギルド一覧",
-                *(self.current_result.processed_guilds or ["なし"]),
-                "",
-                "## 各ギルドの処理状況",
-                *[f"{name}: {'完了' if var.get() else '未完了'}" for name, var in self.completed_guild_vars.items()],
-                "",
-            ])
-        old_lines = [format_record_label(record) for record in old_records] or ["なし"]
-        new_lines = [format_record_label(record) for record in new_records] or ["なし"]
-        transfer_lines = [candidate.label for candidate in transfer_candidates] or ["なし"]
-        lines.extend(["## 画面に残っている旧欄（追跡不明候補）", *old_lines])
-        lines.extend(["", "## 画面に残っている新欄（新規プレイヤー候補）", *new_lines])
-        lines.extend(["", "## 未処理の移籍候補", *transfer_lines])
-        lines.extend(["", "## summary側から取れる主要データ", *self._summary_material_lines(new_date)])
-        lines.extend([
-            "",
-            "## AIに作文させるための注意書き",
-            "以下はギルドカルテ用コメントを作るための材料です。数字を無理に全部使わず、自然で読みやすいコメントにしてください。事務的すぎず、煽りすぎず、成長傾向・メンバー変動・注目点が伝わる文章にしてください。",
-            "",
-            "## メモ",
-            "このファイルはAIへ直接送信していません。必要に応じて内容を確認・編集してから利用してください。",
-        ])
-        output_path.write_text("\n".join(lines), encoding="utf-8")
-        self.log(f"原文作成材料を出力しました: {output_path}")
-        messagebox.showinfo("原文作成", f"txtを出力しました。\n{output_path}")
-
-    def _summary_material_lines(self, date_value: str) -> list[str]:
-        from openpyxl import load_workbook
-
-        normalized = date_value.replace("-", "").replace("_", "")
-        candidates = [
-            ANALYSIS_DIR / f"summary_{date_value}.xlsx",
-            ANALYSIS_DIR / f"summary_{normalized}.xlsx",
-        ]
-        summary_path = next((path for path in candidates if path.exists()), None)
-        if summary_path is None:
-            return ["summaryファイルが見つかりません。"]
-        lines = [f"summaryファイル: {summary_path.name}"]
-        try:
-            workbook = load_workbook(summary_path, data_only=True, read_only=True)
-            for sheet_name in workbook.sheetnames:
-                if sheet_name.lower() == "autocomment":
-                    continue
-                sheet = workbook[sheet_name]
-                lines.append(f"### {sheet_name}")
-                for row_index, row in enumerate(sheet.iter_rows(values_only=True), start=1):
-                    values = [str(value) for value in row[:10] if value not in (None, "")]
-                    if values:
-                        lines.append(" / ".join(values))
-                    if row_index >= 20:
-                        break
-            workbook.close()
-        except Exception as exc:
-            lines.append(f"summary読み取りエラー: {exc}")
-        return lines or ["summaryに抽出可能なデータがありません。"]
 
     @staticmethod
     def _hyphen_date(value: str) -> str:
