@@ -22,8 +22,10 @@ from openpyxl.utils import get_column_letter
 
 try:
     from .paths import ANALYSIS_DIR, CONFIG_DIR, DATA_DIR, PROJECT_ROOT, ensure_dirs
+    from . import session as session_state
 except ImportError:  # 直接実行された場合のため
     from paths import ANALYSIS_DIR, CONFIG_DIR, DATA_DIR, PROJECT_ROOT, ensure_dirs  # type: ignore
+    import session as session_state  # type: ignore
 
 BASE_DIR = PROJECT_ROOT
 SETTINGS_FILE = CONFIG_DIR / "analysis_settings.json"
@@ -504,16 +506,44 @@ def analyze_guild(guild_dir: Path, settings: AnalysisSettings) -> dict[str, Any]
     return metrics
 
 
+def session_guild_dirs() -> list[Path] | None:
+    """Return guild directories collected in the active session, or None.
+
+    ``None`` means no session is active and the caller should fall back to
+    scanning every guild directory.
+    """
+
+    session = session_state.load_session()
+    if not session:
+        return None
+    dirs: dict[str, Path] = {}
+    for workbook_path in session_state.session_guild_files(session).values():
+        guild_dir = workbook_path.parent
+        if guild_dir.is_dir():
+            dirs[guild_dir.name] = guild_dir
+    return [dirs[name] for name in sorted(dirs)]
+
+
 def collect_metrics(settings: AnalysisSettings) -> tuple[list[dict[str, Any]], list[tuple[str, str]]]:
-    """Analyze every guild directory under data/."""
+    """Analyze guild directories under data/.
+
+    When a collection session is active, only the guilds collected in that
+    session are analyzed, so the summary lists exactly what was just gathered.
+    Without a session the analyzer falls back to scanning every guild directory.
+    """
 
     if not DATA_DIR.exists():
         logging.warning("data フォルダが見つかりません: %s", DATA_DIR)
         return [], []
 
+    guild_dirs = session_guild_dirs()
+    if guild_dirs is None:
+        guild_dirs = sorted([path for path in DATA_DIR.iterdir() if path.is_dir()], key=lambda p: p.name)
+    else:
+        logging.info("収集セッションのギルドのみ分析します: %d 件", len(guild_dirs))
+
     metrics: list[dict[str, Any]] = []
     failures: list[tuple[str, str]] = []
-    guild_dirs = sorted([path for path in DATA_DIR.iterdir() if path.is_dir()], key=lambda p: p.name)
 
     for guild_dir in guild_dirs:
         try:
@@ -766,6 +796,9 @@ def daily_summary_output_file(now: datetime | None = None) -> Path:
     naturally creates a different dated workbook.
     """
 
+    session = session_state.load_session()
+    if session and session.get("session_date"):
+        return ANALYSIS_DIR / f"summary_{session['session_date']}.xlsx"
     run_datetime = now or datetime.now()
     return ANALYSIS_DIR / f"summary_{run_datetime.date().isoformat()}.xlsx"
 

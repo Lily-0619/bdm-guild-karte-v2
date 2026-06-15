@@ -30,6 +30,7 @@ try:
         SRC_DIR,
         ensure_dirs,
     )
+    from . import session as session_state
 except ImportError:  # 直接実行された場合のため
     from paths import (  # type: ignore
         APP_ICON_PATH,
@@ -39,6 +40,7 @@ except ImportError:  # 直接実行された場合のため
         SRC_DIR,
         ensure_dirs,
     )
+    import session as session_state  # type: ignore
 
 CARD_GUILDS_FILE = CONFIG_DIR / "card_guilds.txt"
 GUILDS_FILE = CONFIG_DIR / "guilds.txt"
@@ -178,12 +180,47 @@ class LauncherWindow(QMainWindow):
             lambda: self.save_config_file(GUILDS_FILE, self.guilds_editor)
         )
 
+        self.new_session_button = QPushButton("新しい収集を開始")
+        self.new_session_button.setObjectName("saveButton")
+        self.new_session_button.setMinimumHeight(42)
+        self.new_session_button.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.new_session_button.clicked.connect(self.start_new_session)
+        guilds_card.layout().addWidget(self.new_session_button)
+
         columns_layout.addWidget(log_card, 1)
         columns_layout.addWidget(card_guilds_card, 1)
         columns_layout.addWidget(guilds_card, 1)
 
         self.statusBar().showMessage(f"Project: {PROJECT_ROOT}")
         self._apply_styles()
+
+    def start_new_session(self) -> None:
+        session = session_state.load_session()
+        if session is not None:
+            collected = len(session.get("guilds", {}))
+            message = (
+                f"現在の収集セッション（{session['session_date']}・{collected}ギルド）を確定し、\n"
+                "次回の「データ取得」から新しい収集として始めます。よろしいですか？"
+            )
+        else:
+            message = (
+                "現在アクティブな収集セッションはありません。\n"
+                "次回の「データ取得」を新しい収集として始めます。よろしいですか？"
+            )
+        reply = QMessageBox.question(
+            self,
+            "新しい収集を開始",
+            message,
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.No,
+        )
+        if reply != QMessageBox.StandardButton.Yes:
+            return
+        session_state.clear_session()
+        self.append_log(
+            "[INFO] 収集セッションをリセットしました。次回のデータ取得から新しい収集（開始日＝その日）になります。"
+        )
+        self.statusBar().showMessage("新しい収集を開始できます。")
 
     def launch_pv_detail_app(self) -> None:
         started = QProcess.startDetached(

@@ -158,6 +158,7 @@ class PVDetailApp(tk.Tk):
         self.new_date_var = tk.StringVar()
         self.new_combo = ttk.Combobox(controls, textvariable=self.new_date_var, width=14, state="readonly")
         self.new_combo.grid(row=0, column=3, padx=4)
+        self.new_combo.bind("<<ComboboxSelected>>", lambda _event: self._refresh_guild_checklist())
         ttk.Button(controls, text="Start", command=self.start_analysis, style="Accent.TButton").grid(row=0, column=4, padx=10)
         ttk.Button(controls, text="更新", command=self.refresh_inputs, style="Soft.TButton").grid(row=0, column=5, padx=4)
         ttk.Button(controls, text="原文作成", command=self.create_comment_materials, style="Accent.TButton").grid(row=0, column=7, padx=4)
@@ -273,7 +274,12 @@ class PVDetailApp(tk.Tk):
         for child in self.guild_frame.winfo_children():
             child.destroy()
         self.completed_guild_vars.clear()
-        for row, guild_name in enumerate(self.tracker.list_guild_names()):
+        # 選んだ新データ（サマリー）のギルドだけを表示する。サマリー未選択や
+        # 旧データしか無い場合は、従来通り全ギルドを表示する。
+        guild_names = self.tracker.list_guild_names_for_summary(self.new_date_var.get())
+        if not guild_names:
+            guild_names = self.tracker.list_guild_names()
+        for row, guild_name in enumerate(guild_names):
             var = tk.BooleanVar(value=False)
             self.completed_guild_vars[guild_name] = var
             ttk.Checkbutton(self.guild_frame, text=guild_name, variable=var).grid(row=row, column=0, sticky="w", pady=1)
