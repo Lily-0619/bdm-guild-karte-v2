@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import importlib
 import importlib.util
+import json
 import logging
 import math
 import platform
@@ -29,8 +30,18 @@ except ImportError:  # 直接実行された場合のため
 
 ROOT_DIR = PROJECT_ROOT
 CONFIG_PATH = CONFIG_DIR / "card_guilds.txt"
+AI_CONFIG_PATH = CONFIG_DIR / "autocomment_ai.json"
+COMMENT_SOURCE_DIR = ANALYSIS_DIR / "comment_source"
 TEMPLATE_PATH = ROOT_DIR / "template" / "karte.xlsx"
 OUTPUT_DIR = CARDS_DIR
+
+# AIコメントのどの長さをカルテに入れるか。config で変更できる。
+AI_COMMENT_VARIANT_KEYS = {
+    "normal": ("normal_comment", "detail_comment", "short_comment"),
+    "short": ("short_comment", "normal_comment", "detail_comment"),
+    "detail": ("detail_comment", "normal_comment", "short_comment"),
+}
+DEFAULT_AI_COMMENT_VARIANT = "normal"
 
 SUMMARY_PATTERN = "summary_*.xlsx"
 GUILD_PATTERN = "guild_*.xlsx"
@@ -126,6 +137,42 @@ def output_date_from_summary(summary_path: Path) -> str:
     if match:
         return match.group(1)
     return datetime.fromtimestamp(summary_path.stat().st_mtime).strftime("%Y-%m-%d")
+
+
+def read_card_comment_variant() -> str:
+    """Return the configured AI comment length for the card (default normal)."""
+    try:
+        config = json.loads(AI_CONFIG_PATH.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return DEFAULT_AI_COMMENT_VARIANT
+    variant = str(config.get("card_comment_variant", DEFAULT_AI_COMMENT_VARIANT)).strip().lower()
+    return variant if variant in AI_COMMENT_VARIANT_KEYS else DEFAULT_AI_COMMENT_VARIANT
+
+
+def load_ai_comments(summary_date: str) -> dict[str, str]:
+    """Load generated AI comments for a summary date as guild_name -> text.
+
+    Reads ``analysis/comment_source/<date>/ai_comments.json``. Returns an empty
+    mapping when the file is missing so card generation falls back to the
+    rule-based ``auto_comment`` from the summary.
+    """
+    json_path = COMMENT_SOURCE_DIR / summary_date / "ai_comments.json"
+    if not json_path.exists():
+        return {}
+    try:
+        payload = json.loads(json_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        logger.warning("AIコメントの読み込みに失敗しました（カルテは従来コメントを使用）: %s", exc)
+        return {}
+    variant_keys = AI_COMMENT_VARIANT_KEYS[read_card_comment_variant()]
+    result: dict[str, str] = {}
+    for guild_name, comment in (payload.get("comments") or {}).items():
+        if not isinstance(comment, dict):
+            continue
+        text = next((comment.get(key) for key in variant_keys if comment.get(key)), "")
+        if text:
+            result[guild_name] = str(text)
+    return result
 
 
 def normalize_header(value: Any) -> str:
@@ -540,6 +587,7 @@ def create_card_for_guild(
     metric_record: dict[str, Any],
     rank_by_avg_cpm: Any,
     summary_date: str,
+    ai_comment: str | None = None,
 ) -> Path | None:
     guild_workbook_path = find_latest_guild_workbook(guild_name)
     if guild_workbook_path is None:
@@ -569,6 +617,9 @@ def create_card_for_guild(
 
     try:
         context = build_context(guild_name, metric_record, rank_by_avg_cpm)
+        if ai_comment:
+            # AIコメントがあれば、ルールベースの auto_comment より優先する。
+            context["auto_comment"] = ai_comment
         replace_placeholders(wb, context)
         write_autocomment(wb[TEMPLATE_CARD_SHEET], context)
         write_members(wb[TEMPLATE_MEMBERS_SHEET], members)
@@ -590,6 +641,9 @@ def main() -> int:
         summary_date = output_date_from_summary(summary_path)
         logger.info("summary を読み込みます: %s", summary_path)
         guild_metrics, rankings = load_summary(summary_path)
+        ai_comments = load_ai_comments(summary_date)
+        if ai_comments:
+            logger.info("AIコメントを読み込みました（%s, %d件）", read_card_comment_variant(), len(ai_comments))
 
         created = 0
         for guild_name in guilds:
@@ -602,7 +656,13 @@ def main() -> int:
             if rank_by_avg_cpm is None:
                 rank_by_avg_cpm = metric_record.get("rank_by_avg_cpm")
 
-            if create_card_for_guild(guild_name, metric_record, rank_by_avg_cpm, summary_date):
+            if create_card_for_guild(
+                guild_name,
+                metric_record,
+                rank_by_avg_cpm,
+                summary_date,
+                ai_comment=ai_comments.get(guild_name),
+            ):
                 created += 1
 
         if created == 0:
