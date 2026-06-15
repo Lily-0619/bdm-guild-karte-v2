@@ -7,9 +7,11 @@ from datetime import datetime
 from pathlib import Path
 import os
 import queue
+import re
 import subprocess
 import sys
 import threading
+import time
 import tkinter as tk
 from tkinter import messagebox, ttk
 
@@ -18,6 +20,8 @@ from .paths import ANALYSIS_DIR, AUTOCOMMENT_DIR, BACKDESIGN_PATH, PROJECT_ROOT,
 
 
 BACKGROUND_IMAGE = BACKDESIGN_PATH
+# comment_ai.py が出すギルド進捗行: "[進捗] 3/46 ギルド名"
+PROGRESS_RE = re.compile(r"^\[進捗\]\s+(\d+)/(\d+)\s+(.*)$")
 MAKE_CARD_SCRIPT = SRC_DIR / "make_card.py"
 COMMENT_SOURCE_SCRIPT = SRC_DIR / "comment_source.py"
 COMMENT_AI_SCRIPT = SRC_DIR / "comment_ai.py"
@@ -30,12 +34,18 @@ AI_MODEL_OPTIONS = {
 
 
 def child_process_env() -> dict[str, str]:
-    """Force UTF-8 stdout in child scripts so their Japanese logs aren't garbled.
+    """Env for child scripts: UTF-8 stdout, and unbuffered for live progress.
 
     On Windows a piped child defaults to cp932, which our utf-8 reader would
-    mojibake. Setting these makes the child emit utf-8.
+    mojibake; PYTHONIOENCODING/PYTHONUTF8 fix that. PYTHONUNBUFFERED makes the
+    child flush each line so progress shows in real time instead of all at once.
     """
-    return {**os.environ, "PYTHONIOENCODING": "utf-8", "PYTHONUTF8": "1"}
+    return {
+        **os.environ,
+        "PYTHONIOENCODING": "utf-8",
+        "PYTHONUTF8": "1",
+        "PYTHONUNBUFFERED": "1",
+    }
 
 
 @dataclass(frozen=True)
@@ -74,6 +84,8 @@ class PVDetailApp(tk.Tk):
         self.last_created_new_count = 0
         self.make_card_running = False
         self.comment_running = False
+        self.comment_total = 0
+        self.comment_start_time: float | None = None
         self._build_window()
         self._build_widgets()
         self.refresh_inputs()
@@ -225,6 +237,12 @@ class PVDetailApp(tk.Tk):
         self.progress_var = tk.IntVar(value=0)
         self.progress = ttk.Progressbar(status, variable=self.progress_var, maximum=100)
         self.progress.grid(row=2, column=0, columnspan=2, sticky="ew", pady=(10, 0))
+        self.comment_progress_var = tk.StringVar(value="")
+        ttk.Label(
+            status,
+            textvariable=self.comment_progress_var,
+            font=(self.config_data.font_family, 11, "bold"),
+        ).grid(row=3, column=0, columnspan=2, sticky="w", pady=(6, 0))
 
         errors = ttk.LabelFrame(center, text="Error / 手動確認", padding=10, style="Glass.TLabelframe")
         errors.grid(row=2, column=0, sticky="nsew", pady=(10, 0))
@@ -359,9 +377,17 @@ class PVDetailApp(tk.Tk):
             elif kind == "make_card_done":
                 self.make_card_running = False
                 self.log(str(payload))
+            elif kind == "comment_progress":
+                self._update_comment_progress(*payload)
             elif kind == "comment_done":
                 self.comment_running = False
-                self.log(str(payload))
+                done_text = str(payload)
+                if done_text.startswith("[OK]"):
+                    self.progress_var.set(100)
+                    self.comment_progress_var.set("コメント作成 完了")
+                else:
+                    self.comment_progress_var.set("コメント作成 失敗")
+                self.log(done_text)
         self.after(150, self._drain_worker_queue)
 
     def _show_result(self, result) -> None:
@@ -577,6 +603,11 @@ class PVDetailApp(tk.Tk):
             ("AIコメント生成", [str(COMMENT_AI_SCRIPT), *date_args, *model_args]),
         ]
         self.comment_running = True
+        self.comment_total = 0
+        self.comment_start_time = None
+        self.progress_var.set(0)
+        self.current_guild_var.set("-")
+        self.comment_progress_var.set("準備中（元データ作成・Ollama起動中）...")
         self.log(f"[START] コメント作成（{self.ai_model_var.get()}）。Ollamaが未起動なら自動で起動します。")
         thread = threading.Thread(target=self._run_comments_worker, args=(jobs,), daemon=True)
         thread.start()
@@ -596,7 +627,13 @@ class PVDetailApp(tk.Tk):
             )
             assert process.stdout is not None
             for line in process.stdout:
-                self.worker_queue.put(("log", line.rstrip()))
+                text = line.rstrip()
+                self.worker_queue.put(("log", text))
+                match = PROGRESS_RE.match(text)
+                if match:
+                    self.worker_queue.put(
+                        ("comment_progress", (int(match.group(1)), int(match.group(2)), match.group(3).strip()))
+                    )
             exit_code = process.wait()
             if exit_code != 0:
                 self.worker_queue.put(
@@ -604,6 +641,25 @@ class PVDetailApp(tk.Tk):
                 )
                 return
         self.worker_queue.put(("comment_done", "[OK] コメント作成が完了しました。次に「PNG作成」を実行してください。"))
+
+    def _update_comment_progress(self, index: int, total: int, guild: str) -> None:
+        """Update the progress bar, current guild, and ETA during generation."""
+        self.comment_total = total
+        if self.comment_start_time is None:
+            self.comment_start_time = time.monotonic()
+        done = index - 1  # このギルドの生成を始める時点で完了済みの数
+        percent = int(done / total * 100) if total else 0
+        self.progress_var.set(percent)
+        self.current_guild_var.set(guild)
+        elapsed = time.monotonic() - self.comment_start_time
+        if done >= 1:
+            remaining = elapsed / done * (total - done)
+            eta_text = f"残り 約{int(remaining // 60)}分{int(remaining % 60):02d}秒"
+        else:
+            eta_text = "残り 計算中…"
+        self.comment_progress_var.set(
+            f"AIコメント生成: {index}/{total}（{guild}） ・ 経過 {int(elapsed // 60)}分{int(elapsed % 60):02d}秒 ・ {eta_text}"
+        )
 
     def run_make_card(self) -> None:
         if self.make_card_running:
