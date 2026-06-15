@@ -120,6 +120,14 @@ class LauncherWindow(QMainWindow):
         )
         header_layout.addWidget(self.comment_source_button, 0, Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
 
+        self.comment_ai_button = self._make_run_button("AIコメント生成")
+        self.comment_ai_button.setObjectName("topActionButton")
+        self.comment_ai_button.setMinimumWidth(150)
+        self.comment_ai_button.clicked.connect(
+            lambda: self.run_scripts([("AIコメント生成", SRC_DIR / "comment_ai.py")])
+        )
+        header_layout.addWidget(self.comment_ai_button, 0, Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+
         self.progress_bar = QProgressBar()
         self.progress_bar.setObjectName("progressBar")
         self.progress_bar.setRange(0, 100)
