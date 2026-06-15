@@ -27,11 +27,13 @@ from typing import Any, Iterable, Optional
 try:
     from .paths import ANALYSIS_DIR, CONFIG_DIR, ensure_dirs
     from . import comment_source as cs
+    from . import ollama_runtime
     from .autocomment_ollama import OllamaError, call_ollama_chat, load_ai_config, _normalize_comment
     from .autocomment_prompt import COMMENT_SCHEMA, SYSTEM_PROMPT
 except ImportError:  # 直接実行された場合のため
     from paths import ANALYSIS_DIR, CONFIG_DIR, ensure_dirs  # type: ignore
     import comment_source as cs  # type: ignore
+    import ollama_runtime  # type: ignore
     from autocomment_ollama import OllamaError, call_ollama_chat, load_ai_config, _normalize_comment  # type: ignore
     from autocomment_prompt import COMMENT_SCHEMA, SYSTEM_PROMPT  # type: ignore
 
@@ -71,9 +73,52 @@ def select_summaries(new_date: Optional[str], old_date: Optional[str]):
     return new_summary, old_summary, new_date, old_date_str
 
 
+def build_ai_material_text(record: dict[str, Any], new_date: str, old_date: Optional[str]) -> str:
+    """A compact, AI-facing version of the material (no full member table).
+
+    The viewable Markdown keeps the whole roster, but for generation we only need
+    the aggregate, the whole-server comparison phrases, and a few member
+    highlights -- a much smaller prompt that the model answers far faster.
+    """
+    row = record["summary_row"]
+    lines: list[str] = [f"# {record['guild_name']} コメント材料"]
+    period = f"集計日: {new_date}"
+    if old_date:
+        period += f" / 前回比較日: {old_date}"
+    lines.append(period)
+    lines.append("")
+    lines.append("## 全体の中での位置づけ")
+    lines.append(f"- {record['phrases']['position']}")
+    lines.append(f"- 構成傾向: {record['phrases']['power']}")
+    lines.append(f"- 伸び: {record['phrases']['growth']}")
+    lines.append("")
+    lines.append("## 主要指標（全体比較込み）")
+    for key, label in cs.GUILD_SUMMARY_FIELDS:
+        value = record[key] if key in record else row.get(key)
+        lines.append(f"- {label}: {value if value not in (None, '') else '不明'}")
+    lines.append("")
+    if record["growth_top"]:
+        lines.append("## 伸び上位メンバー")
+        for member in record["growth_top"]:
+            lines.append(f"- {member['player_name']}: 前回比 +{member.get('growth')}（CPM {member.get('cpm')}）")
+        lines.append("")
+    if record["growth_bottom"]:
+        lines.append("## 停滞・減少メンバー")
+        for member in record["growth_bottom"]:
+            lines.append(f"- {member['player_name']}: 前回比 {member.get('growth')}（CPM {member.get('cpm')}）")
+        lines.append("")
+    top_members = record["members"][:8]
+    if top_members:
+        lines.append("## 上位CPMメンバー")
+        for member in top_members:
+            lines.append(f"- {member['player_name']}: CPM {member.get('cpm')}")
+        lines.append("")
+    return "\n".join(lines)
+
+
 def build_messages(record: dict[str, Any], new_date: str, old_date: Optional[str]) -> list[dict[str, str]]:
     """Build the Ollama chat messages for one guild from its material."""
-    material_text = cs.build_guild_markdown(record, new_date, old_date)
+    material_text = build_ai_material_text(record, new_date, old_date)
     instruction = {
         "task": "BDMギルド別コメント作成",
         "guild_name": record["guild_name"],
@@ -125,6 +170,26 @@ def generate_comments(
         except (OSError, json.JSONDecodeError, ValueError) as exc:
             skip_ai = True
             errors.append(f"AI設定読み込みに失敗しました: {exc}")
+
+    if not skip_ai:
+        base_url = str(config.get("base_url") or ollama_runtime.DEFAULT_BASE_URL)
+        ok, message = ollama_runtime.ensure_running(base_url)
+        print(message)
+        if not ok:
+            skip_ai = True
+            errors.append(message)
+        else:
+            model = str(config.get("model") or "")
+            if model and not ollama_runtime.has_model(model, base_url):
+                installed = ollama_runtime.list_models(base_url)
+                warning = (
+                    f"モデル '{model}' が未取得です。`ollama pull {model}` を実行するか、"
+                    f"config/autocomment_ai.json の model を導入済みモデルに変更してください。"
+                    f" 導入済み: {', '.join(installed) if installed else 'なし'}"
+                )
+                print(warning)
+                errors.append(warning)
+                skip_ai = True  # 全ギルドが同じ失敗を繰り返すのを避ける
 
     for record in records:
         guild_name = record["guild_name"]
