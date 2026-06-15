@@ -27,6 +27,7 @@ COG_EXTENSIONS = (
     "bot.cogs.admin",
     "bot.cogs.ai_talk",
     "bot.cogs.mini_game",
+    "bot.cogs.voice",
 )
 
 
