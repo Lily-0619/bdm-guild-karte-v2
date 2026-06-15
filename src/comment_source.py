@@ -480,19 +480,24 @@ def write_markdown(records: list[dict[str, Any]], out_dir: Path, new_date: str, 
 
 # ---- 実行 -----------------------------------------------------------------
 
-def start_ollama_prewarm() -> Optional[threading.Thread]:
+def start_ollama_prewarm(model: Optional[str] = None) -> Optional[threading.Thread]:
     """Warm Ollama in the background while the data is being built.
 
     The AI comment step that follows needs Ollama up with the model loaded.
     Starting it here (concurrently with this data step) means it is ready by the
-    time the user runs AIコメント生成. Best effort: any failure is ignored.
+    time the user runs AIコメント生成. ``model`` overrides the configured model so
+    the warmed model matches what generation will use. Best effort: failures are
+    ignored.
     """
+    base_url = ollama_runtime.DEFAULT_BASE_URL
+    config_model = ""
     try:
         config = json.loads(AI_CONFIG_PATH.read_text(encoding="utf-8"))
+        base_url = str(config.get("base_url") or ollama_runtime.DEFAULT_BASE_URL)
+        config_model = str(config.get("model") or "")
     except (OSError, json.JSONDecodeError):
-        return None
-    base_url = str(config.get("base_url") or ollama_runtime.DEFAULT_BASE_URL)
-    model = str(config.get("model") or "")
+        pass
+    model = model or config_model
     if not model:
         return None
 
@@ -506,9 +511,9 @@ def start_ollama_prewarm() -> Optional[threading.Thread]:
     return thread
 
 
-def run(new_date: Optional[str] = None, old_date: Optional[str] = None) -> dict[str, Path]:
+def run(new_date: Optional[str] = None, old_date: Optional[str] = None, *, model: Optional[str] = None) -> dict[str, Path]:
     ensure_dirs()
-    prewarm_thread = start_ollama_prewarm()
+    prewarm_thread = start_ollama_prewarm(model)
     summaries = list_summary_paths()
     if not summaries:
         raise FileNotFoundError(
@@ -557,8 +562,9 @@ def main(argv: Optional[Iterable[str]] = None) -> int:
     )
     parser.add_argument("--new-date", default=None, help="対象サマリー日付 (YYYY-MM-DD)。省略時は最新。")
     parser.add_argument("--old-date", default=None, help="前回比較サマリー日付 (YYYY-MM-DD)。省略時は直近過去。")
+    parser.add_argument("--model", default=None, help="ウォームアップするOllamaモデル。省略時はconfigの設定を使用。")
     args = parser.parse_args(list(argv) if argv is not None else None)
-    run(new_date=args.new_date, old_date=args.old_date)
+    run(new_date=args.new_date, old_date=args.old_date, model=args.model)
     return 0
 
 
