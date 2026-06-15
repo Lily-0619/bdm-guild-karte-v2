@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
+import os
 import queue
 import subprocess
 import sys
@@ -26,6 +27,15 @@ AI_MODEL_OPTIONS = {
     "品質重視（gemma3:4b・遅い）": "gemma3:4b",
     "速度重視（lfm2.5-1.2b・速い）": "LiquidAI/lfm2.5-1.2b-instruct:latest",
 }
+
+
+def child_process_env() -> dict[str, str]:
+    """Force UTF-8 stdout in child scripts so their Japanese logs aren't garbled.
+
+    On Windows a piped child defaults to cp932, which our utf-8 reader would
+    mojibake. Setting these makes the child emit utf-8.
+    """
+    return {**os.environ, "PYTHONIOENCODING": "utf-8", "PYTHONUTF8": "1"}
 
 
 @dataclass(frozen=True)
@@ -582,6 +592,7 @@ class PVDetailApp(tk.Tk):
                 text=True,
                 encoding="utf-8",
                 errors="replace",
+                env=child_process_env(),
             )
             assert process.stdout is not None
             for line in process.stdout:
@@ -616,6 +627,7 @@ class PVDetailApp(tk.Tk):
             text=True,
             encoding="utf-8",
             errors="replace",
+            env=child_process_env(),
         )
         assert process.stdout is not None
         for line in process.stdout:
