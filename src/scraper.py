@@ -17,8 +17,10 @@ if TYPE_CHECKING:
 
 try:
     from .paths import CONFIG_DIR, DATA_DIR, PROJECT_ROOT, ensure_dirs
+    from . import session as session_state
 except ImportError:  # 直接実行された場合のため
     from paths import CONFIG_DIR, DATA_DIR, PROJECT_ROOT, ensure_dirs  # type: ignore
+    import session as session_state  # type: ignore
 
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
@@ -1348,6 +1350,9 @@ def main() -> int:
     ensure_dirs()
     load_project_env(ENV_PATH)
 
+    session = session_state.get_or_create_session()
+    print(f"収集セッション: {session['session_date']}（このセッションに追記します）")
+
     try:
         guilds = load_guild_names(CONFIG_PATH)
     except Exception as e:
@@ -1374,6 +1379,7 @@ def main() -> int:
                     members = scrape_members_from_guild_page(page)
                     body_text = page.locator("body").inner_text()
                     workbook_path = save_guild_workbook(guild, members, body_text)
+                    session_state.record_guild(guild, workbook_path)
                     save_guild_snapshot_to_sqlite(guild, members, body_text)
                     print(f"  取得メンバー数: {len(members)}人")
                     expected_count = parse_expected_active_member_count(body_text)
