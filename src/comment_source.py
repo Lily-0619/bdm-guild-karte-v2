@@ -27,7 +27,8 @@ from typing import Any, Iterable, Optional
 from openpyxl import Workbook, load_workbook
 
 try:
-    from .paths import ANALYSIS_DIR, PROJECT_ROOT, ensure_dirs
+    from .paths import ANALYSIS_DIR, CONFIG_DIR, PROJECT_ROOT, ensure_dirs
+    from . import ollama_runtime
     from .analyze import (
         classify_power_type,
         describe_growth,
@@ -37,7 +38,8 @@ try:
         to_number,
     )
 except ImportError:  # 直接実行された場合のため
-    from paths import ANALYSIS_DIR, PROJECT_ROOT, ensure_dirs  # type: ignore
+    from paths import ANALYSIS_DIR, CONFIG_DIR, PROJECT_ROOT, ensure_dirs  # type: ignore
+    import ollama_runtime  # type: ignore
     from analyze import (  # type: ignore
         classify_power_type,
         describe_growth,
@@ -46,6 +48,11 @@ except ImportError:  # 直接実行された場合のため
         rank_position_label,
         to_number,
     )
+
+import json
+import threading
+
+AI_CONFIG_PATH = CONFIG_DIR / "autocomment_ai.json"
 
 
 SUMMARY_DATE_RE = re.compile(r"summary_(\d{4})-(\d{2})-(\d{2})\.xlsx$", re.IGNORECASE)
@@ -473,8 +480,40 @@ def write_markdown(records: list[dict[str, Any]], out_dir: Path, new_date: str, 
 
 # ---- 実行 -----------------------------------------------------------------
 
-def run(new_date: Optional[str] = None, old_date: Optional[str] = None) -> dict[str, Path]:
+def start_ollama_prewarm(model: Optional[str] = None) -> Optional[threading.Thread]:
+    """Warm Ollama in the background while the data is being built.
+
+    The AI comment step that follows needs Ollama up with the model loaded.
+    Starting it here (concurrently with this data step) means it is ready by the
+    time the user runs AIコメント生成. ``model`` overrides the configured model so
+    the warmed model matches what generation will use. Best effort: failures are
+    ignored.
+    """
+    base_url = ollama_runtime.DEFAULT_BASE_URL
+    config_model = ""
+    try:
+        config = json.loads(AI_CONFIG_PATH.read_text(encoding="utf-8"))
+        base_url = str(config.get("base_url") or ollama_runtime.DEFAULT_BASE_URL)
+        config_model = str(config.get("model") or "")
+    except (OSError, json.JSONDecodeError):
+        pass
+    model = model or config_model
+    if not model:
+        return None
+
+    def _warm() -> None:
+        ok, message = ollama_runtime.warm_model(model, base_url, log=lambda *_: None)
+        print(f"[prewarm] {message}")
+
+    thread = threading.Thread(target=_warm, daemon=True)
+    thread.start()
+    print(f"[prewarm] Ollama（{model}）の起動・読み込みを並行開始しました。")
+    return thread
+
+
+def run(new_date: Optional[str] = None, old_date: Optional[str] = None, *, model: Optional[str] = None) -> dict[str, Path]:
     ensure_dirs()
+    prewarm_thread = start_ollama_prewarm(model)
     summaries = list_summary_paths()
     if not summaries:
         raise FileNotFoundError(
@@ -508,6 +547,12 @@ def run(new_date: Optional[str] = None, old_date: Optional[str] = None) -> dict[
     print(f"ギルド数: {len(records)}")
     print(f"Excel: {excel_path}")
     print(f"Markdown: {markdown_dir}")
+
+    if prewarm_thread is not None:
+        # 終了するとロード中リクエストが切れるため、ウォームアップ完了を待つ。
+        print("[prewarm] Ollamaのウォームアップ完了を待っています...")
+        prewarm_thread.join()
+
     return {"excel": excel_path, "markdown_dir": markdown_dir}
 
 
@@ -517,8 +562,9 @@ def main(argv: Optional[Iterable[str]] = None) -> int:
     )
     parser.add_argument("--new-date", default=None, help="対象サマリー日付 (YYYY-MM-DD)。省略時は最新。")
     parser.add_argument("--old-date", default=None, help="前回比較サマリー日付 (YYYY-MM-DD)。省略時は直近過去。")
+    parser.add_argument("--model", default=None, help="ウォームアップするOllamaモデル。省略時はconfigの設定を使用。")
     args = parser.parse_args(list(argv) if argv is not None else None)
-    run(new_date=args.new_date, old_date=args.old_date)
+    run(new_date=args.new_date, old_date=args.old_date, model=args.model)
     return 0
 
 

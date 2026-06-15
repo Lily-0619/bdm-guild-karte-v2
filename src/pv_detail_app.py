@@ -18,6 +18,14 @@ from .paths import ANALYSIS_DIR, AUTOCOMMENT_DIR, BACKDESIGN_PATH, PROJECT_ROOT,
 
 BACKGROUND_IMAGE = BACKDESIGN_PATH
 MAKE_CARD_SCRIPT = SRC_DIR / "make_card.py"
+COMMENT_SOURCE_SCRIPT = SRC_DIR / "comment_source.py"
+COMMENT_AI_SCRIPT = SRC_DIR / "comment_ai.py"
+
+# AIコメント生成に使うモデルの選択肢（表示名 -> Ollamaモデルid）。
+AI_MODEL_OPTIONS = {
+    "品質重視（gemma3:4b・遅い）": "gemma3:4b",
+    "速度重視（lfm2.5-1.2b・速い）": "LiquidAI/lfm2.5-1.2b-instruct:latest",
+}
 
 
 @dataclass(frozen=True)
@@ -55,6 +63,7 @@ class PVDetailApp(tk.Tk):
         self.last_moved_lost_count = 0
         self.last_created_new_count = 0
         self.make_card_running = False
+        self.comment_running = False
         self._build_window()
         self._build_widgets()
         self.refresh_inputs()
@@ -161,8 +170,21 @@ class PVDetailApp(tk.Tk):
         self.new_combo.bind("<<ComboboxSelected>>", lambda _event: self._refresh_guild_checklist())
         ttk.Button(controls, text="Start", command=self.start_analysis, style="Accent.TButton").grid(row=0, column=4, padx=10)
         ttk.Button(controls, text="更新", command=self.refresh_inputs, style="Soft.TButton").grid(row=0, column=5, padx=4)
-        ttk.Button(controls, text="原文作成", command=self.create_comment_materials, style="Accent.TButton").grid(row=0, column=7, padx=4)
-        ttk.Button(controls, text="ギルドカルテ作成", command=self.run_make_card, style="Accent.TButton").grid(row=0, column=8, padx=(4, 0))
+        ttk.Button(controls, text="原文作成", command=self.create_comment_materials, style="Soft.TButton").grid(row=0, column=7, padx=4)
+        ttk.Button(controls, text="コメント作成", command=self.run_comments, style="Accent.TButton").grid(row=0, column=8, padx=4)
+        ttk.Button(controls, text="PNG作成", command=self.run_make_card, style="Accent.TButton").grid(row=0, column=9, padx=(4, 0))
+
+        ttk.Label(controls, text="AIモデル").grid(row=1, column=0, padx=4, pady=(8, 0))
+        self.ai_model_var = tk.StringVar()
+        self.ai_model_combo = ttk.Combobox(
+            controls,
+            textvariable=self.ai_model_var,
+            width=26,
+            state="readonly",
+            values=list(AI_MODEL_OPTIONS.keys()),
+        )
+        self.ai_model_combo.grid(row=1, column=1, columnspan=3, sticky="w", padx=4, pady=(8, 0))
+        self.ai_model_var.set(next(iter(AI_MODEL_OPTIONS)))
 
         left = ttk.LabelFrame(root, text="ギルドチェックリスト", padding=10, style="Glass.TLabelframe")
         left.grid(row=1, column=0, sticky="nsew", padx=(0, 10))
@@ -326,6 +348,9 @@ class PVDetailApp(tk.Tk):
                 self.log(str(payload))
             elif kind == "make_card_done":
                 self.make_card_running = False
+                self.log(str(payload))
+            elif kind == "comment_done":
+                self.comment_running = False
                 self.log(str(payload))
         self.after(150, self._drain_worker_queue)
 
@@ -504,6 +529,70 @@ class PVDetailApp(tk.Tk):
         except Exception as exc:
             lines.append(f"summary読み取りエラー: {exc}")
         return lines or ["summaryに抽出可能なデータがありません。"]
+
+    @staticmethod
+    def _hyphen_date(value: str) -> str:
+        """Convert a YYYYMMDD combo value to YYYY-MM-DD for the CLI scripts."""
+        text = (value or "").strip()
+        if len(text) == 8 and text.isdigit():
+            return f"{text[:4]}-{text[4:6]}-{text[6:8]}"
+        return text
+
+    def run_comments(self) -> None:
+        """Build the AI source document, then generate AI comments.
+
+        Run this after the guild's individual data is fully reflected: the
+        document handed to the AI is built from that data. Supports the
+        time-lagged workflow of making comments separately from data entry.
+        """
+        if self.comment_running:
+            self.log("コメント作成はすでに実行中です。")
+            return
+        for script in (COMMENT_SOURCE_SCRIPT, COMMENT_AI_SCRIPT):
+            if not script.exists():
+                self.log(f"スクリプトが見つかりません: {script}")
+                messagebox.showerror("コメント作成", f"スクリプトが見つかりません。\n{script}")
+                return
+        date_args: list[str] = []
+        new_date = self._hyphen_date(self.new_date_var.get())
+        old_date = self._hyphen_date(self.old_date_var.get())
+        if new_date:
+            date_args += ["--new-date", new_date]
+        if old_date:
+            date_args += ["--old-date", old_date]
+        model = AI_MODEL_OPTIONS.get(self.ai_model_var.get())
+        model_args = ["--model", model] if model else []
+        jobs = [
+            ("コメント元データ作成", [str(COMMENT_SOURCE_SCRIPT), *date_args, *model_args]),
+            ("AIコメント生成", [str(COMMENT_AI_SCRIPT), *date_args, *model_args]),
+        ]
+        self.comment_running = True
+        self.log(f"[START] コメント作成（{self.ai_model_var.get()}）。Ollamaが未起動なら自動で起動します。")
+        thread = threading.Thread(target=self._run_comments_worker, args=(jobs,), daemon=True)
+        thread.start()
+
+    def _run_comments_worker(self, jobs: list[tuple[str, list[str]]]) -> None:
+        for label, args in jobs:
+            self.worker_queue.put(("log", f"--- {label} 開始 ---"))
+            process = subprocess.Popen(
+                [sys.executable, *args],
+                cwd=str(PROJECT_ROOT),
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+                encoding="utf-8",
+                errors="replace",
+            )
+            assert process.stdout is not None
+            for line in process.stdout:
+                self.worker_queue.put(("log", line.rstrip()))
+            exit_code = process.wait()
+            if exit_code != 0:
+                self.worker_queue.put(
+                    ("comment_done", f"[FAILED] {label} に失敗しました: 終了コード {exit_code}")
+                )
+                return
+        self.worker_queue.put(("comment_done", "[OK] コメント作成が完了しました。次に「PNG作成」を実行してください。"))
 
     def run_make_card(self) -> None:
         if self.make_card_running:
