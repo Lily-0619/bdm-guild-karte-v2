@@ -21,6 +21,12 @@ MAKE_CARD_SCRIPT = SRC_DIR / "make_card.py"
 COMMENT_SOURCE_SCRIPT = SRC_DIR / "comment_source.py"
 COMMENT_AI_SCRIPT = SRC_DIR / "comment_ai.py"
 
+# AIコメント生成に使うモデルの選択肢（表示名 -> Ollamaモデルid）。
+AI_MODEL_OPTIONS = {
+    "品質重視（gemma3:4b・遅い）": "gemma3:4b",
+    "速度重視（lfm2.5-1.2b・速い）": "LiquidAI/lfm2.5-1.2b-instruct:latest",
+}
+
 
 @dataclass(frozen=True)
 class UIConfig:
@@ -167,6 +173,18 @@ class PVDetailApp(tk.Tk):
         ttk.Button(controls, text="原文作成", command=self.create_comment_materials, style="Soft.TButton").grid(row=0, column=7, padx=4)
         ttk.Button(controls, text="コメント作成", command=self.run_comments, style="Accent.TButton").grid(row=0, column=8, padx=4)
         ttk.Button(controls, text="PNG作成", command=self.run_make_card, style="Accent.TButton").grid(row=0, column=9, padx=(4, 0))
+
+        ttk.Label(controls, text="AIモデル").grid(row=1, column=0, padx=4, pady=(8, 0))
+        self.ai_model_var = tk.StringVar()
+        self.ai_model_combo = ttk.Combobox(
+            controls,
+            textvariable=self.ai_model_var,
+            width=26,
+            state="readonly",
+            values=list(AI_MODEL_OPTIONS.keys()),
+        )
+        self.ai_model_combo.grid(row=1, column=1, columnspan=3, sticky="w", padx=4, pady=(8, 0))
+        self.ai_model_var.set(next(iter(AI_MODEL_OPTIONS)))
 
         left = ttk.LabelFrame(root, text="ギルドチェックリスト", padding=10, style="Glass.TLabelframe")
         left.grid(row=1, column=0, sticky="nsew", padx=(0, 10))
@@ -542,12 +560,14 @@ class PVDetailApp(tk.Tk):
             date_args += ["--new-date", new_date]
         if old_date:
             date_args += ["--old-date", old_date]
+        model = AI_MODEL_OPTIONS.get(self.ai_model_var.get())
+        model_args = ["--model", model] if model else []
         jobs = [
-            ("コメント元データ作成", [str(COMMENT_SOURCE_SCRIPT), *date_args]),
-            ("AIコメント生成", [str(COMMENT_AI_SCRIPT), *date_args]),
+            ("コメント元データ作成", [str(COMMENT_SOURCE_SCRIPT), *date_args, *model_args]),
+            ("AIコメント生成", [str(COMMENT_AI_SCRIPT), *date_args, *model_args]),
         ]
         self.comment_running = True
-        self.log("[START] コメント作成（元データ→AIコメント）。Ollamaが未起動なら自動で起動します。")
+        self.log(f"[START] コメント作成（{self.ai_model_var.get()}）。Ollamaが未起動なら自動で起動します。")
         thread = threading.Thread(target=self._run_comments_worker, args=(jobs,), daemon=True)
         thread.start()
 

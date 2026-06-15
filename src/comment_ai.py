@@ -157,6 +157,7 @@ def generate_comments(
     old_date: Optional[str],
     *,
     skip_ai: bool,
+    model: Optional[str] = None,
 ) -> dict[str, Any]:
     comments: dict[str, Any] = {}
     errors: list[str] = []
@@ -170,6 +171,9 @@ def generate_comments(
         except (OSError, json.JSONDecodeError, ValueError) as exc:
             skip_ai = True
             errors.append(f"AI設定読み込みに失敗しました: {exc}")
+
+    if model:  # GUI/CLIで選ばれたモデルを優先する。
+        config["model"] = model
 
     if not skip_ai:
         base_url = str(config.get("base_url") or ollama_runtime.DEFAULT_BASE_URL)
@@ -245,12 +249,18 @@ def write_comment_markdown(out_dir: Path, guild_name: str, comment: dict[str, An
     (out_dir / file_name).write_text("\n".join(lines), encoding="utf-8")
 
 
-def run(new_date: Optional[str] = None, old_date: Optional[str] = None, *, skip_ai: bool = False) -> Path:
+def run(
+    new_date: Optional[str] = None,
+    old_date: Optional[str] = None,
+    *,
+    skip_ai: bool = False,
+    model: Optional[str] = None,
+) -> Path:
     ensure_dirs()
     new_summary, old_summary, new_date, old_date_str = select_summaries(new_date, old_date)
     records = cs.build_guild_records(new_summary, old_summary)
 
-    result = generate_comments(records, new_date, old_date_str, skip_ai=skip_ai)
+    result = generate_comments(records, new_date, old_date_str, skip_ai=skip_ai, model=model)
 
     out_dir = ANALYSIS_DIR / "comment_source" / new_date
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -278,8 +288,9 @@ def main(argv: Optional[Iterable[str]] = None) -> int:
     parser.add_argument("--new-date", default=None, help="対象サマリー日付 (YYYY-MM-DD)。省略時は最新。")
     parser.add_argument("--old-date", default=None, help="前回比較サマリー日付 (YYYY-MM-DD)。省略時は直近過去。")
     parser.add_argument("--skip-ai", action="store_true", help="Ollamaを呼ばず雛形JSONだけ作成します。")
+    parser.add_argument("--model", default=None, help="使用するOllamaモデル。省略時はconfigの設定を使用。")
     args = parser.parse_args(list(argv) if argv is not None else None)
-    run(new_date=args.new_date, old_date=args.old_date, skip_ai=args.skip_ai)
+    run(new_date=args.new_date, old_date=args.old_date, skip_ai=args.skip_ai, model=args.model)
     return 0
 
 
