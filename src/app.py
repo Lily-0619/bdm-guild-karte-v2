@@ -112,6 +112,14 @@ class LauncherWindow(QMainWindow):
         )
         header_layout.addWidget(self.analyze_button, 0, Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
 
+        self.comment_source_button = self._make_run_button("コメント元データ作成")
+        self.comment_source_button.setObjectName("topActionButton")
+        self.comment_source_button.setMinimumWidth(170)
+        self.comment_source_button.clicked.connect(
+            lambda: self.run_scripts([("コメント元データ作成", SRC_DIR / "comment_source.py")])
+        )
+        header_layout.addWidget(self.comment_source_button, 0, Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+
         self.progress_bar = QProgressBar()
         self.progress_bar.setObjectName("progressBar")
         self.progress_bar.setRange(0, 100)
