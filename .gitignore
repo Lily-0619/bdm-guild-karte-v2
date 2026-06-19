@@ -32,3 +32,10 @@ Thumbs.db
 
 # Collection session state (runtime only)
 data/.session.json
+
+# Local data & generated outputs — NOT pushed to GitHub (contains other players' game data)
+data/
+deta_PV/
+output/
+analysis/
+backups/
