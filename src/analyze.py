@@ -363,15 +363,24 @@ def workbook_sort_key(path: Path) -> tuple[datetime, float, str]:
     return (file_date, path.stat().st_mtime, path.name)
 
 
-def find_guild_workbooks(guild_dir: Path) -> list[Path]:
-    """Return guild_*.xlsx workbooks in chronological order."""
+def find_guild_workbooks(guild_dir: Path, as_of_date: str | None = None) -> list[Path]:
+    """Return guild_*.xlsx workbooks in chronological order.
+
+    When ``as_of_date`` (``YYYY-MM-DD``) is given, only workbooks dated on or
+    before that date are returned, so a past day's summary can be rebuilt from
+    the data as it stood then.
+    """
 
     files = [
         path
         for path in guild_dir.glob("guild_*.xlsx")
         if path.is_file() and not path.name.startswith("~$")
     ]
-    return sorted(files, key=workbook_sort_key)
+    ordered = sorted(files, key=workbook_sort_key)
+    if as_of_date is None:
+        return ordered
+    cutoff = datetime.strptime(as_of_date, "%Y-%m-%d")
+    return [path for path in ordered if workbook_sort_key(path)[0] <= cutoff]
 
 
 def calculate_cpm_metrics(cpms: list[float], settings: AnalysisSettings) -> dict[str, Any]:
@@ -442,10 +451,16 @@ def calculate_previous_average(previous_file: Path | None) -> float | str:
     return previous_average
 
 
-def analyze_guild(guild_dir: Path, settings: AnalysisSettings) -> dict[str, Any]:
-    """Analyze the latest workbook in one guild directory."""
+def analyze_guild(
+    guild_dir: Path, settings: AnalysisSettings, as_of_date: str | None = None
+) -> dict[str, Any]:
+    """Analyze the latest workbook in one guild directory.
 
-    workbooks = find_guild_workbooks(guild_dir)
+    With ``as_of_date`` the latest workbook on or before that date is used, so a
+    past collection day can be reconstructed without being shadowed by newer data.
+    """
+
+    workbooks = find_guild_workbooks(guild_dir, as_of_date=as_of_date)
     if not workbooks:
         raise FileNotFoundError(f"guild_*.xlsx が見つかりません: {guild_dir}")
 
