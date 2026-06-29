@@ -5,5 +5,5 @@
   "temperature": 0.4,
   "timeout_sec": 120,
   "output_format": "json",
-  "card_comment_variant": "normal"
+  "card_comment_variant": "full"
 }
