@@ -36,12 +36,16 @@ TEMPLATE_PATH = ROOT_DIR / "template" / "karte.xlsx"
 OUTPUT_DIR = CARDS_DIR
 
 # AIコメントのどの長さをカルテに入れるか。config で変更できる。
+# "full" は本文＋注目点をまとめてカルテに丸ごと載せる（既定）。
 AI_COMMENT_VARIANT_KEYS = {
     "normal": ("normal_comment", "detail_comment", "short_comment"),
     "short": ("short_comment", "normal_comment", "detail_comment"),
     "detail": ("detail_comment", "normal_comment", "short_comment"),
 }
-DEFAULT_AI_COMMENT_VARIANT = "normal"
+AI_COMMENT_FULL_VARIANT = "full"
+# 本文として優先する順（full のとき先頭から最初に値があるものを採用）。
+AI_COMMENT_FULL_BODY_KEYS = ("detail_comment", "normal_comment", "short_comment")
+DEFAULT_AI_COMMENT_VARIANT = AI_COMMENT_FULL_VARIANT
 
 SUMMARY_PATTERN = "summary_*.xlsx"
 GUILD_PATTERN = "guild_*.xlsx"
@@ -146,7 +150,30 @@ def read_card_comment_variant() -> str:
     except (OSError, json.JSONDecodeError):
         return DEFAULT_AI_COMMENT_VARIANT
     variant = str(config.get("card_comment_variant", DEFAULT_AI_COMMENT_VARIANT)).strip().lower()
-    return variant if variant in AI_COMMENT_VARIANT_KEYS else DEFAULT_AI_COMMENT_VARIANT
+    valid = set(AI_COMMENT_VARIANT_KEYS) | {AI_COMMENT_FULL_VARIANT}
+    return variant if variant in valid else DEFAULT_AI_COMMENT_VARIANT
+
+
+def build_full_comment(comment: dict[str, Any]) -> str:
+    """Combine the AI comment body and attention points into one card comment.
+
+    Picks the longest available body text (detail → normal → short) and appends
+    the attention points as a bulleted ``注目点`` block so the whole AI output is
+    placed on the card instead of just a single one-liner.
+    """
+    parts: list[str] = []
+    body = next(
+        (str(comment[key]).strip() for key in AI_COMMENT_FULL_BODY_KEYS if str(comment.get(key) or "").strip()),
+        "",
+    )
+    if body:
+        parts.append(body)
+
+    bullets = [str(point).strip() for point in (comment.get("attention_points") or []) if str(point).strip()]
+    if bullets:
+        parts.append("【注目点】\n" + "\n".join(f"・{bullet}" for bullet in bullets))
+
+    return "\n\n".join(parts)
 
 
 def load_ai_comments(summary_date: str) -> dict[str, str]:
@@ -164,12 +191,16 @@ def load_ai_comments(summary_date: str) -> dict[str, str]:
     except (OSError, json.JSONDecodeError) as exc:
         logger.warning("AIコメントの読み込みに失敗しました（カルテは従来コメントを使用）: %s", exc)
         return {}
-    variant_keys = AI_COMMENT_VARIANT_KEYS[read_card_comment_variant()]
+    variant = read_card_comment_variant()
+    variant_keys = AI_COMMENT_VARIANT_KEYS.get(variant)
     result: dict[str, str] = {}
     for guild_name, comment in (payload.get("comments") or {}).items():
         if not isinstance(comment, dict):
             continue
-        text = next((comment.get(key) for key in variant_keys if comment.get(key)), "")
+        if variant_keys is None:  # "full": 本文＋注目点を丸ごとまとめる
+            text = build_full_comment(comment)
+        else:
+            text = next((comment.get(key) for key in variant_keys if comment.get(key)), "")
         if text:
             result[guild_name] = str(text)
     return result
