@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import argparse
 import csv
+import json
 import os
 import re
 import sys
@@ -1333,11 +1335,109 @@ def search_and_open_guild(page: Page, guild_name: str) -> None:
     click_exact_guild_from_ranking(page, guild_name)
 
 
+class ApiCapture:
+    """Record DBonk network responses for the API-migration investigation.
+
+    ``--capture-api <出力先>`` 付きで通常スクレイピングを1回走らせると、
+    サイトが実際に叩いているXHR/fetchのURL・ステータス・レスポンスボディを
+    保存する。ここで得たAPI一覧をもとに、innerTextパースからAPI直取得へ
+    移行する（docs/api_migration.md 参照）。取得の本流には影響を与えない：
+    キャプチャ内の例外はすべて握りつぶす。
+    """
+
+    MAX_BODY_BYTES = 2 * 1024 * 1024
+    MAX_ENTRIES = 800
+
+    def __init__(self, out_dir: Path) -> None:
+        self.out_dir = out_dir
+        self.out_dir.mkdir(parents=True, exist_ok=True)
+        self.index_path = self.out_dir / "index.jsonl"
+        self.count = 0
+
+    def attach(self, page: Page) -> None:
+        page.on("response", self._on_response)
+        print(f"APIキャプチャを開始します -> {self.out_dir}")
+
+    @staticmethod
+    def _slug(text: str) -> str:
+        slug = re.sub(r"[^A-Za-z0-9._-]+", "_", text).strip("_")
+        return slug[:60] or "response"
+
+    def _should_capture(self, response) -> bool:
+        url = response.url
+        if "dbonk.com" not in url:
+            return False
+        resource_type = ""
+        try:
+            resource_type = response.request.resource_type
+        except Exception:
+            pass
+        content_type = (response.headers or {}).get("content-type", "")
+        return (
+            resource_type in ("xhr", "fetch")
+            or "json" in content_type
+            or ".php" in url
+        )
+
+    def _on_response(self, response) -> None:
+        try:
+            if self.count >= self.MAX_ENTRIES or not self._should_capture(response):
+                return
+            self.count += 1
+            entry = {
+                "n": self.count,
+                "url": response.url,
+                "method": response.request.method,
+                "status": response.status,
+                "resource_type": response.request.resource_type,
+                "content_type": (response.headers or {}).get("content-type", ""),
+                "post_data": None,
+                "body_file": None,
+                "error": None,
+            }
+            try:
+                post_data = response.request.post_data
+                if post_data:
+                    entry["post_data"] = post_data[: self.MAX_BODY_BYTES]
+            except Exception as exc:  # noqa: BLE001
+                entry["error"] = f"post_data: {exc}"
+            try:
+                body = response.body()
+                if body and len(body) <= self.MAX_BODY_BYTES:
+                    extension = "json" if "json" in entry["content_type"] else "txt"
+                    from urllib.parse import urlparse
+
+                    path_part = urlparse(response.url).path.rsplit("/", 1)[-1]
+                    body_name = f"{self.count:04d}_{self._slug(path_part)}.{extension}"
+                    (self.out_dir / body_name).write_bytes(body)
+                    entry["body_file"] = body_name
+                elif body:
+                    entry["error"] = f"body too large: {len(body)} bytes"
+            except Exception as exc:  # noqa: BLE001
+                entry["error"] = f"body: {exc}"
+            with self.index_path.open("a", encoding="utf-8") as handle:
+                handle.write(json.dumps(entry, ensure_ascii=False) + "\n")
+        except Exception:  # noqa: BLE001 - キャプチャの失敗で取得を止めない。
+            pass
+
+
 def main() -> int:
     from playwright.sync_api import (
         TimeoutError as PlaywrightTimeoutError,
         sync_playwright,
     )
+
+    parser = argparse.ArgumentParser(description="DBonkからギルドデータを取得します。")
+    parser.add_argument(
+        "--capture-api",
+        metavar="DIR",
+        default=None,
+        help=(
+            "API移行調査用: 取得中のXHR/fetchレスポンスを指定フォルダへ記録する"
+            "（通常の取得動作には影響しません）。"
+        ),
+    )
+    args = parser.parse_args()
 
     # GUI(app.py)から QProcess 経由で起動された場合、stdout はパイプになり
     # ブロックバッファリングのせいでログが最後にまとめて出てしまう。
@@ -1363,6 +1463,11 @@ def main() -> int:
         browser = p.chromium.launch(headless=False)
         ctx = browser.new_context()
         page = ctx.new_page()
+        if args.capture_api:
+            try:
+                ApiCapture(Path(args.capture_api)).attach(page)
+            except Exception as exc:  # noqa: BLE001 - キャプチャ失敗は取得を止めない。
+                print(f"⚠ APIキャプチャを開始できませんでした: {exc}")
         page.goto(DBONK_LOGIN_URL, wait_until="domcontentloaded")
         try_auto_login(page)
         try_select_asia_server(page)
