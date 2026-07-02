@@ -23,9 +23,11 @@ from openpyxl.utils import get_column_letter
 try:
     from .paths import ANALYSIS_DIR, CONFIG_DIR, DATA_DIR, PROJECT_ROOT, ensure_dirs
     from . import session as session_state
+    from . import snapshot_store
 except ImportError:  # 直接実行された場合のため
     from paths import ANALYSIS_DIR, CONFIG_DIR, DATA_DIR, PROJECT_ROOT, ensure_dirs  # type: ignore
     import session as session_state  # type: ignore
+    import snapshot_store  # type: ignore
 
 BASE_DIR = PROJECT_ROOT
 SETTINGS_FILE = CONFIG_DIR / "analysis_settings.json"
@@ -191,11 +193,17 @@ PERCENT_FORMAT_COLUMNS = {
 }
 
 
+# 入力ソース。"auto" はギルドごとにSQLite優先・Excelフォールバック。
+SOURCE_MODES = ("auto", "sqlite", "excel")
+DEFAULT_SOURCE_MODE = "auto"
+
+
 @dataclass(frozen=True)
 class AnalysisSettings:
     """Configurable analysis parameters."""
 
     top_avg_counts: list[int]
+    source: str = DEFAULT_SOURCE_MODE
 
 
 def setup_logging() -> None:
@@ -209,7 +217,8 @@ def load_settings() -> AnalysisSettings:
 
     The script works without the JSON file. If present, it can contain:
     {
-      "top_avg_counts": [10, 15, 20, 25]
+      "top_avg_counts": [10, 15, 20, 25],
+      "source": "auto"   // auto | sqlite | excel
     }
     """
 
@@ -220,7 +229,13 @@ def load_settings() -> AnalysisSettings:
     try:
         raw = json.loads(SETTINGS_FILE.read_text(encoding="utf-8"))
         top_counts = raw.get("top_avg_counts", settings.top_avg_counts)
-        return AnalysisSettings(top_avg_counts=[int(value) for value in top_counts])
+        source = str(raw.get("source", DEFAULT_SOURCE_MODE)).strip().lower()
+        if source not in SOURCE_MODES:
+            logging.warning("source の値が不正です（%s）。auto を使います。", source)
+            source = DEFAULT_SOURCE_MODE
+        return AnalysisSettings(
+            top_avg_counts=[int(value) for value in top_counts], source=source
+        )
     except Exception as exc:  # noqa: BLE001 - bad config should not stop analysis.
         logging.warning("設定ファイルの読み込みに失敗しました。定数を使います: %s", exc)
         return settings
@@ -469,7 +484,6 @@ def analyze_guild(
 
     cpms = read_cpm_values(latest_file)
     summary = read_summary_values(latest_file)
-    cpm_metrics = calculate_cpm_metrics(cpms, settings)
 
     guild_name = summary.get("guild_name") or guild_dir.name
     retrieved_at = summary.get("retrieved_at")
@@ -477,9 +491,88 @@ def analyze_guild(
         member_rows = sheet_rows(latest_file, "members")
         retrieved_at = member_rows[0].get("retrieved_at", "") if member_rows else ""
 
+    try:
+        source_file = str(latest_file.relative_to(BASE_DIR))
+    except ValueError:  # プロジェクト外のファイルは絶対パスのまま記録する。
+        source_file = str(latest_file)
+
+    return assemble_guild_metrics(
+        guild_name=str(guild_name),
+        source_file=source_file,
+        retrieved_at=retrieved_at,
+        cpms=cpms,
+        summary=summary,
+        prev_avg_cpm=calculate_previous_average(previous_file),
+        settings=settings,
+    )
+
+
+def analyze_guild_sqlite(
+    conn: Any, guild_name: str, settings: AnalysisSettings, as_of_date: str | None = None
+) -> dict[str, Any]:
+    """Analyze one guild from SQLite snapshots (same semantics as Excel mode).
+
+    最新の収集日＝最新スナップショット、その前の収集日＝前回、として
+    Excel版（最新ブック／1つ前のブック）と同じ比較になるよう日付単位で扱う。
+    """
+
+    dates = snapshot_store.snapshot_dates(conn, guild_name, as_of_date=as_of_date)
+    if not dates:
+        raise FileNotFoundError(f"SQLiteにメンバーデータがありません: {guild_name}")
+
+    latest_date = dates[-1]
+    latest_retrieved = snapshot_store.latest_retrieved_at(conn, guild_name, latest_date)
+    if latest_retrieved is None:
+        raise FileNotFoundError(f"SQLiteスナップショットを特定できません: {guild_name}")
+
+    cpms = snapshot_store.member_cpms(conn, guild_name, latest_retrieved)
+    summary = snapshot_store.summary_mapping(conn, guild_name, latest_retrieved)
+
+    prev_avg_cpm: float | str = ""
+    if len(dates) >= 2:
+        previous_retrieved = snapshot_store.latest_retrieved_at(
+            conn, guild_name, dates[-2]
+        )
+        if previous_retrieved is not None:
+            prev_avg_cpm = rounded_average(
+                snapshot_store.member_cpms(conn, guild_name, previous_retrieved)
+            )
+
+    # 下流（comment_source / pv_tracker）はsource_fileでメンバー明細を辿るため、
+    # 実在するExcelがあればそのパスを、無ければsqlite仮想パスを入れる。
+    excel_path = snapshot_store.excel_workbook_path(guild_name, latest_date)
+    if excel_path is not None:
+        source_file = str(excel_path.relative_to(BASE_DIR))
+    else:
+        source_file = f"sqlite:{guild_name}@{latest_date}"
+
+    return assemble_guild_metrics(
+        guild_name=guild_name,
+        source_file=source_file,
+        retrieved_at=summary.get("retrieved_at") or latest_retrieved,
+        cpms=cpms,
+        summary=summary,
+        prev_avg_cpm=prev_avg_cpm,
+        settings=settings,
+    )
+
+
+def assemble_guild_metrics(
+    *,
+    guild_name: str,
+    source_file: str,
+    retrieved_at: Any,
+    cpms: list[float],
+    summary: dict[str, Any],
+    prev_avg_cpm: float | str,
+    settings: AnalysisSettings,
+) -> dict[str, Any]:
+    """Build one guild's metrics row (shared by the Excel and SQLite paths)."""
+
+    cpm_metrics = calculate_cpm_metrics(cpms, settings)
     metrics: dict[str, Any] = {
         "guild_name": guild_name,
-        "source_file": str(latest_file.relative_to(BASE_DIR)),
+        "source_file": source_file,
         "retrieved_at": retrieved_at,
         **cpm_metrics,
     }
@@ -507,7 +600,6 @@ def analyze_guild(
     metrics["node_siege_total"] = total_node_wars + total_siege_wars
     metrics["node_siege_win_total"] = node_won + siege_won
 
-    prev_avg_cpm = calculate_previous_average(previous_file)
     metrics["prev_avg_cpm"] = prev_avg_cpm
     if prev_avg_cpm != "" and metrics["avg_cpm"] != "":
         metrics["avg_cpm_growth"] = round_numeric(metrics["avg_cpm"] - prev_avg_cpm)
@@ -521,54 +613,125 @@ def analyze_guild(
     return metrics
 
 
-def session_guild_dirs() -> list[Path] | None:
-    """Return guild directories collected in the active session, or None.
+def build_guild_targets(
+    conn: Any, settings: AnalysisSettings
+) -> list[tuple[str | None, Path | None]]:
+    """Return (guild_name, guild_dir) pairs to analyze.
 
-    ``None`` means no session is active and the caller should fall back to
-    scanning every guild directory.
+    セッションがあればその収集ギルド（実名＋ブックの親フォルダ）。無ければ
+    Excelモード互換で data/ 配下のフォルダを走査し、SQLiteが使えるときは
+    サニタイズ済みフォルダ名→実ギルド名の対応をDBから引く。source=sqlite で
+    セッションも無い場合は、DBに存在する全ギルドを対象にする。
     """
 
     session = session_state.load_session()
-    if not session:
-        return None
-    dirs: dict[str, Path] = {}
-    for workbook_path in session_state.session_guild_files(session).values():
-        guild_dir = workbook_path.parent
-        if guild_dir.is_dir():
-            dirs[guild_dir.name] = guild_dir
-    return [dirs[name] for name in sorted(dirs)]
+    if session:
+        targets: list[tuple[str | None, Path | None]] = []
+        for name, workbook_path in sorted(
+            session_state.session_guild_files(session).items()
+        ):
+            guild_dir = workbook_path.parent
+            targets.append((name, guild_dir if guild_dir.is_dir() else None))
+        logging.info("収集セッションのギルドのみ分析します: %d 件", len(targets))
+        return targets
 
-
-def collect_metrics(settings: AnalysisSettings) -> tuple[list[dict[str, Any]], list[tuple[str, str]]]:
-    """Analyze guild directories under data/.
-
-    When a collection session is active, only the guilds collected in that
-    session are analyzed, so the summary lists exactly what was just gathered.
-    Without a session the analyzer falls back to scanning every guild directory.
-    """
+    if settings.source == "sqlite" and conn is not None:
+        return [(name, None) for name in snapshot_store.guild_names(conn)]
 
     if not DATA_DIR.exists():
         logging.warning("data フォルダが見つかりません: %s", DATA_DIR)
-        return [], []
+        return []
 
-    guild_dirs = session_guild_dirs()
-    if guild_dirs is None:
-        guild_dirs = sorted([path for path in DATA_DIR.iterdir() if path.is_dir()], key=lambda p: p.name)
-    else:
-        logging.info("収集セッションのギルドのみ分析します: %d 件", len(guild_dirs))
+    name_map = snapshot_store.sanitized_name_map(conn) if conn is not None else {}
+    return [
+        (name_map.get(path.name), path)
+        for path in sorted(
+            (p for p in DATA_DIR.iterdir() if p.is_dir()), key=lambda p: p.name
+        )
+    ]
+
+
+def analyze_target(
+    conn: Any,
+    settings: AnalysisSettings,
+    guild_name: str | None,
+    guild_dir: Path | None,
+) -> tuple[dict[str, Any], str]:
+    """Analyze one guild, returning (metrics, used_source)."""
+
+    if settings.source == "sqlite":
+        if conn is None:
+            raise RuntimeError("source=sqlite ですがデータベースを開けませんでした。")
+        if guild_name is None:
+            raise FileNotFoundError(
+                f"SQLiteに対応するギルド名が見つかりません: {guild_dir}"
+            )
+        return analyze_guild_sqlite(conn, guild_name, settings), "sqlite"
+
+    if settings.source == "excel" or conn is None or guild_name is None:
+        if guild_dir is None:
+            raise FileNotFoundError(f"ギルドフォルダが見つかりません: {guild_name}")
+        return analyze_guild(guild_dir, settings), "excel"
+
+    # auto: SQLite優先、失敗したら従来通りExcelへフォールバック。
+    try:
+        return analyze_guild_sqlite(conn, guild_name, settings), "sqlite"
+    except Exception as exc:  # noqa: BLE001 - fall back to the Excel path.
+        if guild_dir is None:
+            raise
+        logging.debug("SQLite読込に失敗したためExcelを使用します (%s): %s", guild_name, exc)
+        return analyze_guild(guild_dir, settings), "excel"
+
+
+def collect_metrics(settings: AnalysisSettings) -> tuple[list[dict[str, Any]], list[tuple[str, str]]]:
+    """Analyze all target guilds from SQLite and/or Excel.
+
+    When a collection session is active, only the guilds collected in that
+    session are analyzed, so the summary lists exactly what was just gathered.
+    Without a session the analyzer falls back to scanning every guild directory
+    (or, with source=sqlite, every guild in the database).
+    """
+
+    conn = None
+    if settings.source in ("auto", "sqlite") and snapshot_store.database_exists():
+        try:
+            conn = snapshot_store.open_connection()
+        except Exception as exc:  # noqa: BLE001 - DB故障時はExcelで続行できる。
+            logging.warning("SQLiteを開けませんでした（Excelで続行します）: %s", exc)
+    if settings.source == "sqlite" and conn is None:
+        logging.error("source=sqlite ですが %s を開けません。", snapshot_store.db.DEFAULT_DB_PATH)
+        return [], [("(database)", "SQLiteデータベースを開けませんでした。")]
 
     metrics: list[dict[str, Any]] = []
     failures: list[tuple[str, str]] = []
+    source_counts: dict[str, int] = {"sqlite": 0, "excel": 0}
 
-    for guild_dir in guild_dirs:
-        try:
-            guild_metrics = analyze_guild(guild_dir, settings)
-            metrics.append(guild_metrics)
-            logging.info("読み込み成功: %s", guild_metrics["guild_name"])
-        except Exception as exc:  # noqa: BLE001 - continue with the next guild.
-            failures.append((guild_dir.name, str(exc)))
-            logging.exception("読み込み失敗: %s", guild_dir.name)
+    try:
+        targets = build_guild_targets(conn, settings)
+        for guild_name, guild_dir in targets:
+            label = guild_name or (guild_dir.name if guild_dir else "(unknown)")
+            try:
+                guild_metrics, used_source = analyze_target(
+                    conn, settings, guild_name, guild_dir
+                )
+                metrics.append(guild_metrics)
+                source_counts[used_source] += 1
+                logging.info(
+                    "読み込み成功: %s (%s)", guild_metrics["guild_name"], used_source
+                )
+            except Exception as exc:  # noqa: BLE001 - continue with the next guild.
+                failures.append((label, str(exc)))
+                logging.exception("読み込み失敗: %s", label)
+    finally:
+        if conn is not None:
+            conn.close()
 
+    if metrics:
+        logging.info(
+            "入力ソース内訳: SQLite %d 件 / Excel %d 件",
+            source_counts["sqlite"],
+            source_counts["excel"],
+        )
     return metrics, failures
 
 
@@ -855,9 +1018,24 @@ def write_analysis_workbook(
 def main() -> None:
     """Run the guild analysis."""
 
+    import argparse
+    import dataclasses
+
+    parser = argparse.ArgumentParser(description="ギルドデータを分析してサマリーを作成します。")
+    parser.add_argument(
+        "--source",
+        choices=SOURCE_MODES,
+        default=None,
+        help="入力ソース。省略時は config/analysis_settings.json の source（既定: auto）。",
+    )
+    args = parser.parse_args()
+
     ensure_dirs()
     setup_logging()
     settings = load_settings()
+    if args.source:
+        settings = dataclasses.replace(settings, source=args.source)
+    logging.info("入力ソースモード: %s", settings.source)
     metrics, failures = collect_metrics(settings)
     enrich_comparison_metrics(metrics)
 
