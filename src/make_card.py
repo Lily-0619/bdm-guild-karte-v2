@@ -25,8 +25,10 @@ from openpyxl.styles import Border, PatternFill, Side
 
 try:
     from .paths import ANALYSIS_DIR, CARDS_DIR, CONFIG_DIR, DATA_DIR, PROJECT_ROOT, ensure_dirs
+    from . import karte_render
 except ImportError:  # 直接実行された場合のため
     from paths import ANALYSIS_DIR, CARDS_DIR, CONFIG_DIR, DATA_DIR, PROJECT_ROOT, ensure_dirs  # type: ignore
+    import karte_render  # type: ignore
 
 ROOT_DIR = PROJECT_ROOT
 CONFIG_PATH = CONFIG_DIR / "card_guilds.txt"
@@ -46,6 +48,14 @@ AI_COMMENT_FULL_VARIANT = "full"
 # 本文として優先する順（full のとき先頭から最初に値があるものを採用）。
 AI_COMMENT_FULL_BODY_KEYS = ("detail_comment", "normal_comment", "short_comment")
 DEFAULT_AI_COMMENT_VARIANT = AI_COMMENT_FULL_VARIANT
+
+# PNGレンダラー。"pillow"（既定・Excel不要）/ "excel"（従来COM）/ "none"（xlsxのみ）。
+# config/autocomment_ai.json の "png_renderer" で変更できる。
+PNG_RENDERERS = ("pillow", "excel", "none")
+DEFAULT_PNG_RENDERER = "pillow"
+# COM出力と同じ範囲。config の "karte_png_range" / "members_png_range" で変更できる。
+DEFAULT_KARTE_PNG_RANGE = "A1:M30"
+DEFAULT_MEMBERS_PNG_RANGE = "A1:G28"
 
 SUMMARY_PATTERN = "summary_*.xlsx"
 GUILD_PATTERN = "guild_*.xlsx"
@@ -143,15 +153,34 @@ def output_date_from_summary(summary_path: Path) -> str:
     return datetime.fromtimestamp(summary_path.stat().st_mtime).strftime("%Y-%m-%d")
 
 
+def read_card_config() -> dict[str, Any]:
+    """Read the shared card config JSON (empty dict when missing/broken)."""
+    try:
+        return json.loads(AI_CONFIG_PATH.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {}
+
+
 def read_card_comment_variant() -> str:
     """Return the configured AI comment length for the card (default normal)."""
-    try:
-        config = json.loads(AI_CONFIG_PATH.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
-        return DEFAULT_AI_COMMENT_VARIANT
+    config = read_card_config()
     variant = str(config.get("card_comment_variant", DEFAULT_AI_COMMENT_VARIANT)).strip().lower()
     valid = set(AI_COMMENT_VARIANT_KEYS) | {AI_COMMENT_FULL_VARIANT}
     return variant if variant in valid else DEFAULT_AI_COMMENT_VARIANT
+
+
+def read_png_renderer() -> str:
+    """Return the configured PNG renderer (default pillow)."""
+    renderer = str(read_card_config().get("png_renderer", DEFAULT_PNG_RENDERER)).strip().lower()
+    return renderer if renderer in PNG_RENDERERS else DEFAULT_PNG_RENDERER
+
+
+def read_png_ranges() -> tuple[str, str]:
+    """Return the (karte, members) PNG cell ranges."""
+    config = read_card_config()
+    karte_range = str(config.get("karte_png_range") or DEFAULT_KARTE_PNG_RANGE)
+    members_range = str(config.get("members_png_range") or DEFAULT_MEMBERS_PNG_RANGE)
+    return karte_range, members_range
 
 
 def build_full_comment(comment: dict[str, Any]) -> str:
@@ -589,9 +618,10 @@ def export_png_with_excel(xlsx_path: Path, karte_png_path: Path, members_png_pat
         excel.DisplayAlerts = False
         workbook = excel.Workbooks.Open(str(xlsx_path.resolve()))
 
+        karte_range, members_range = read_png_ranges()
         exports = (
-            (TEMPLATE_CARD_SHEET, "A1:M30", karte_png_path),
-            (TEMPLATE_MEMBERS_SHEET, "A1:G28", members_png_path),
+            (TEMPLATE_CARD_SHEET, karte_range, karte_png_path),
+            (TEMPLATE_MEMBERS_SHEET, members_range, members_png_path),
         )
         for sheet_name, cell_range, png_path in exports:
             try:
@@ -611,6 +641,46 @@ def export_png_with_excel(xlsx_path: Path, karte_png_path: Path, members_png_pat
             pythoncom.CoUninitialize()  # type: ignore[name-defined]
         except Exception:
             pass
+
+
+def export_png_with_pillow(xlsx_path: Path, karte_png_path: Path, members_png_path: Path) -> bool:
+    """Render both card sheets to PNG with Pillow (works without Excel).
+
+    Returns True when every sheet was rendered. 失敗したシートがあっても
+    xlsx は残っているので、呼び出し側はCOMフォールバックを試せる。
+    """
+    karte_range, members_range = read_png_ranges()
+    exports = (
+        (TEMPLATE_CARD_SHEET, karte_range, karte_png_path),
+        (TEMPLATE_MEMBERS_SHEET, members_range, members_png_path),
+    )
+    all_ok = True
+    for sheet_name, cell_range, png_path in exports:
+        try:
+            karte_render.render_range_to_png(xlsx_path, sheet_name, cell_range, png_path)
+            logger.info("PNG を出力しました (pillow): %s", png_path)
+        except Exception as exc:  # noqa: BLE001 - xlsxは既に保存済み。
+            logger.warning("Pillow PNG 出力に失敗しました: %s: %s", png_path, exc)
+            all_ok = False
+    return all_ok
+
+
+def export_card_pngs(xlsx_path: Path, karte_png_path: Path, members_png_path: Path) -> None:
+    """Export card PNGs using the configured renderer.
+
+    既定は Pillow（Excel不要）。失敗した場合は従来のExcel COMへ自動フォールバック。
+    "excel" で従来動作、"none" でPNG出力を行わない。
+    """
+    renderer = read_png_renderer()
+    if renderer == "none":
+        logger.info("png_renderer=none のためPNG出力をスキップします: %s", xlsx_path)
+        return
+    if renderer == "excel":
+        export_png_with_excel(xlsx_path, karte_png_path, members_png_path)
+        return
+    if not export_png_with_pillow(xlsx_path, karte_png_path, members_png_path):
+        logger.info("Pillow出力に失敗したシートがあるため、Excel COM出力を試します。")
+        export_png_with_excel(xlsx_path, karte_png_path, members_png_path)
 
 
 def create_card_for_guild(
@@ -660,7 +730,7 @@ def create_card_for_guild(
         wb.close()
 
     logger.info("XLSX を出力しました: %s", xlsx_path)
-    export_png_with_excel(xlsx_path, karte_png_path, members_png_path)
+    export_card_pngs(xlsx_path, karte_png_path, members_png_path)
     return xlsx_path
 
 

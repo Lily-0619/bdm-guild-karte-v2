@@ -29,6 +29,7 @@ from openpyxl import Workbook, load_workbook
 try:
     from .paths import ANALYSIS_DIR, CONFIG_DIR, PROJECT_ROOT, ensure_dirs
     from . import ollama_runtime
+    from . import snapshot_store
     from .analyze import (
         classify_power_type,
         describe_growth,
@@ -40,6 +41,7 @@ try:
 except ImportError:  # 直接実行された場合のため
     from paths import ANALYSIS_DIR, CONFIG_DIR, PROJECT_ROOT, ensure_dirs  # type: ignore
     import ollama_runtime  # type: ignore
+    import snapshot_store  # type: ignore
     from analyze import (  # type: ignore
         classify_power_type,
         describe_growth,
@@ -217,6 +219,48 @@ def _cell(row: tuple, index: int) -> Any:
     return row[index] if index is not None and index < len(row) else None
 
 
+def load_members_for_summary_row(row: dict[str, Any]) -> list[dict[str, Any]]:
+    """Load a guild's member detail for one summary row.
+
+    まず summary の ``source_file`` が指すExcelを読み、無い・空のときは
+    SQLite（同ギルド・同収集日の最新スナップショット）へフォールバックする。
+    analyze.py がSQLite入力になっても、コメント材料が欠けないようにするため。
+    """
+    source = resolve_source_file(row)
+    if source is not None:
+        members = load_members(source)
+        if members:
+            return members
+
+    guild_name = str(row.get("guild_name") or "").strip()
+    snapshot_date = str(row.get("retrieved_at") or "")[:10]
+    if not guild_name or len(snapshot_date) != 10:
+        return []
+    if not snapshot_store.database_exists():
+        return []
+    try:
+        conn = snapshot_store.open_connection()
+        try:
+            retrieved = snapshot_store.latest_retrieved_at(conn, guild_name, snapshot_date)
+            if retrieved is None:
+                return []
+            return [
+                {
+                    "rank": member.get("rank"),
+                    "player_name": str(member.get("player_name") or "").strip(),
+                    "level": member.get("level"),
+                    "cpm": to_number(member.get("cpm")),
+                    "fcp": to_number(member.get("fcp")),
+                }
+                for member in snapshot_store.member_rows(conn, guild_name, retrieved)
+                if member.get("player_name")
+            ]
+        finally:
+            conn.close()
+    except Exception:  # noqa: BLE001 - フォールバック失敗は「明細なし」で続行。
+        return []
+
+
 def build_old_cpm_index(old_summary_path: Optional[Path]) -> dict[tuple[str, str], float]:
     """Map (guild_name, player_name) -> previous CPM for growth calculation."""
     if old_summary_path is None:
@@ -224,10 +268,9 @@ def build_old_cpm_index(old_summary_path: Optional[Path]) -> dict[tuple[str, str
     index: dict[tuple[str, str], float] = {}
     for row in load_guild_metrics(old_summary_path):
         guild_name = str(row.get("guild_name") or "").strip()
-        source = resolve_source_file(row)
-        if not guild_name or source is None:
+        if not guild_name:
             continue
-        for member in load_members(source):
+        for member in load_members_for_summary_row(row):
             cpm = member.get("cpm")
             if cpm is not None:
                 index[(guild_name, member["player_name"])] = cpm
@@ -243,8 +286,7 @@ def build_guild_record(
 ) -> dict[str, Any]:
     """Combine one guild's aggregate metrics with its member detail."""
     guild_name = str(row.get("guild_name") or "").strip()
-    source = resolve_source_file(row)
-    members = load_members(source) if source else []
+    members = load_members_for_summary_row(row)
 
     enriched_members: list[dict[str, Any]] = []
     for member in members:
@@ -274,7 +316,7 @@ def build_guild_record(
             "power": describe_power_features(row, stdev_median),
             "growth": describe_growth(row),
         },
-        "missing_source": source is None,
+        "missing_source": not members,
     }
 
 
