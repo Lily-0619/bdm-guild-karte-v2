@@ -805,15 +805,15 @@ def build_rankings(metrics: list[dict[str, Any]]) -> list[dict[str, Any]]:
 def daily_summary_output_file(now: datetime | None = None) -> Path:
     """Return the one-file-per-day summary path.
 
-    The analyzer intentionally uses only the execution date in the filename.
-    Running multiple times on the same day writes the same path and overwrites
-    that day's workbook with the latest analysis. Running on a different day
-    naturally creates a different dated workbook.
+    The filename is based on the execution date -- the day the list is created --
+    so every day of analysis produces its own ``summary_<date>.xlsx`` and a new
+    day never overwrites a previous day's file. The active collection session
+    still decides *which* guilds are analyzed; it no longer pins the filename to
+    the session's start date (that caused later days to overwrite the start
+    day's summary). Running multiple times on the same day overwrites that day's
+    workbook, which downstream (comment/card/PV) expects as one file per date.
     """
 
-    session = session_state.load_session()
-    if session and session.get("session_date"):
-        return ANALYSIS_DIR / f"summary_{session['session_date']}.xlsx"
     run_datetime = now or datetime.now()
     return ANALYSIS_DIR / f"summary_{run_datetime.date().isoformat()}.xlsx"
 
