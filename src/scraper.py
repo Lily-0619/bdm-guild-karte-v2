@@ -35,16 +35,7 @@ DBONK_LOGIN_URL = "https://dbonk.com/bdmbsmv2/index.php"
 RESULT_TIMEOUT_SECONDS = 40
 GUILD_LOAD_TIMEOUT_SECONDS = 60
 POLL_INTERVAL_SECONDS = 0.5
-# ギルド名クリック後、詳細画面へ切り替わるまでの待ち時間。
-# サーバー応答が遅く30秒以上かかることがあるため広めに取る。
-DETAIL_TRANSITION_TIMEOUT_SECONDS = 60
-# クリックで切り替えが始まったか（Loading Data 表示やランキング離脱）を判定する初期猶予。
-# この時間内に何の兆候も無ければ誤クリックとみなし、素早く次の候補へ回す。
-DETAIL_CLICK_GRACE_SECONDS = 8
 DEBUG_SAVE_FILES = False
-# 各ランキング行のパース結果を逐次 print するか。
-# 34ギルド×複数ページ分が毎回出力され、2時間分のログが膨大になるため通常はオフ。
-DEBUG_ROW_LOG = False
 
 
 @dataclass
@@ -218,30 +209,6 @@ def try_select_asia_server(page: Page) -> None:
             continue
 
 
-def get_guild_ranking_search_input(page: Page) -> Locator:
-    strict = page.locator('input[placeholder="Search..."]')
-    for i in range(strict.count()):
-        item = strict.nth(i)
-        try:
-            if item.is_visible():
-                return item
-        except Exception:
-            continue
-
-    broad = page.locator('input[placeholder*="Search"]')
-    for i in range(broad.count()):
-        item = broad.nth(i)
-        try:
-            ph = (item.get_attribute("placeholder") or "").strip()
-            if ph == "Search General Chat":
-                continue
-            if item.is_visible():
-                return item
-        except Exception:
-            continue
-    raise RuntimeError("Guild Ranking 画面の Search... 検索欄が見つかりません。")
-
-
 def close_general_chat_panel(page: Page) -> None:
     try:
         if page.locator('input[placeholder="Search General Chat"]').count() == 0:
@@ -272,503 +239,166 @@ def close_general_chat_panel(page: Page) -> None:
             continue
 
 
-def is_on_guild_ranking_page(page: Page) -> bool:
-    try:
-        if page.get_by_text(re.compile(r"^\s*Guild Rank\s*$", re.I)).first.is_visible():
-            return True
-    except Exception:
-        pass
-    try:
-        if get_guild_ranking_search_input(page).is_visible():
-            return True
-    except Exception:
-        pass
-    return False
+# --- Name Search（左メニュー Search）からギルドを開く -------------------------
+# 旧実装は左メニューの「Guild Ranking」を面積ヒューリスティクスで探し、検索後に
+# 1〜4ページ分の行を走査していた。これは非常に遅いうえ、展開中の左メニューでは
+# 別項目（Node Holder / Enhancement 等）がクリックを横取りし、Chaos Gear
+# Enhancement 画面へ飛んでしまう事故が多かった。
+# 現在は安定した id を持つ Name Search 画面だけを使い、完全一致の 1 件だけを
+# クリックする。
+
+SEARCH_MENU_ITEM = "li#searchg"
+SEARCH_FORM_INPUT = "form#statsearch input.gsinput"
+SEARCH_FORM_SUBMIT = "form#statsearch button.gbuttons"
+SEARCH_RESULT_CONTAINER = "div#mcontent4"
+SEARCH_RESULT_GUILD_SPANS = "result#guildsearch span[data-id]"
+SEARCH_PAGE_READY_TIMEOUT_MS = 20_000
+SEARCH_RESULT_TIMEOUT_MS = 90_000
+DETAIL_LOAD_TIMEOUT_MS = 90_000
+
+DETAIL_READY_JS = """() => {
+    const b = document.body.innerText || '';
+    return b.includes('Active Guild Members')
+        || b.includes('Guild Combat Power')
+        || b.includes('Server Origin');
+}"""
 
 
-def is_on_guild_ranking_page_strict(page: Page) -> bool:
-    """Confirm we landed on Guild Ranking by its header, not just any Search box.
+def js_click(page: Page, selector: str) -> bool:
+    """JS の click() で要素を押す。
 
-    Enhancement など別ページにも検索欄があり is_on_guild_ranking_page では
-    取り違えるため、メニュークリック後の確認にはこの厳密版を使う。
+    左メニューは展開すると項目同士が重なり、Playwright の通常クリックは
+    「... intercepts pointer events」で隣の項目に吸われて別画面へ遷移する。
+    サイト側は jQuery の委譲ハンドラなので、JS の click() でも正しく発火する。
     """
-    try:
-        return page.get_by_text(
-            re.compile(r"^\s*Guild Rank\s*$", re.I)
-        ).first.is_visible()
-    except Exception:
-        return False
-
-
-# 左メニューの他項目。Guild Ranking 行を特定する際、これらを含む要素
-# （＝メニュー全体の巨大コンテナや別項目）を誤クリックしないよう除外する。
-OTHER_MENU_LABELS = (
-    "Player Ranking",
-    "Node Holder",
-    "Enhancement",
-    "Loot Stats",
-    "Guild Management",
-    "Discord Bot",
-    "Server Stats",
-    "Bookmarks",
-    "Faqs",
-    "Asia Menu",
-)
-
-
-def _normalize_text(text: str) -> str:
-    return re.sub(r"\s+", " ", text or "").strip()
-
-
-def find_guild_ranking_menu_item(page: Page) -> Locator | None:
-    """左メニューの「Guild Ranking」行そのもの（最小のクリック要素）を返す。
-
-    'Guild Ranking' を含むだけの大きなコンテナをクリックすると中心座標が
-    Enhancement 等の別項目に当たり誤遷移するため、
-      - テキストに 'Guild Ranking' を含む
-      - 他メニュー項目名を含まない（＝メニュー全体ではない）
-      - テキストが短い（アイコン名の接頭辞程度は許容）
-    要素のうち、最も面積の小さいものを選ぶ。
-    """
-    candidates = page.locator(
-        ":is(a,button,li,span,div,p,[role='button'],[role='link'],[role='menuitem'])"
-    )
-    matches: list[tuple[float, Locator, str, dict]] = []
-    try:
-        count = min(candidates.count(), 400)
-    except Exception:
-        count = 0
-    for i in range(count):
-        el = candidates.nth(i)
-        try:
-            if not el.is_visible():
-                continue
-            text = _normalize_text(el.inner_text())
-            if "Guild Ranking" not in text:
-                continue
-            if len(text) > 40:
-                continue
-            if any(other in text for other in OTHER_MENU_LABELS):
-                continue
-            box = el.bounding_box()
-            if not box:
-                continue
-            area = box.get("width", 0) * box.get("height", 0)
-            matches.append((area, el, text, box))
-        except Exception:
-            continue
-    if not matches:
-        return None
-    matches.sort(key=lambda m: m[0])
-    area, el, text, box = matches[0]
-    print(f"Guild Ranking メニュー項目を特定: text='{text}', box={box}")
-    return el
-
-
-def open_left_menu(page: Page) -> None:
-    toggles = [
-        page.locator("button:has-text('menu')"),
-        page.locator("[aria-label*='menu' i]"),
-        page.locator("button").filter(has_text=re.compile(r"^\s*menu\s*$", re.I)),
-        page.locator(":is(div,span,i)[class*='menu' i]"),
-        page.locator(":is(div,span,i):has-text('menu')"),
-    ]
-    for t in toggles:
-        try:
-            if t.count() > 0 and t.first.is_visible():
-                t.first.click(timeout=2000)
-                page.wait_for_timeout(500)
-                return
-        except Exception:
-            continue
-    fallback = page.locator(":is(button,div,span,i)").filter(
-        has_text=re.compile(r"^\s*menu\s*$", re.I)
-    )
-    for i in range(min(fallback.count(), 10)):
-        el = fallback.nth(i)
-        try:
-            if not el.is_visible():
-                continue
-            box = el.bounding_box()
-            if box and box["x"] < 220 and box["y"] < 220:
-                el.click(timeout=2000)
-                page.wait_for_timeout(500)
-                return
-        except Exception:
-            continue
-
-
-GUILD_RANKING_OPEN_ATTEMPTS = 3
-# クリック後、Guild Ranking のヘッダーが出るかを確認する待ち時間（短め）。
-# ここで出なければ別ページ（Enhancement等）を誤って開いた可能性が高いので
-# メニューを開き直して再試行する。
-GUILD_RANKING_CONFIRM_SECONDS = 12
-
-
-def open_guild_ranking_page(page: Page) -> None:
-    if is_on_guild_ranking_page_strict(page):
-        return
-
-    last_error = ""
-    for attempt in range(1, GUILD_RANKING_OPEN_ATTEMPTS + 1):
-        close_general_chat_panel(page)
-        open_left_menu(page)
-
-        item = find_guild_ranking_menu_item(page)
-        if item is None:
-            last_error = "メニュー内に Guild Ranking 項目が見つかりません。"
-            print(f"⚠ {last_error}（試行 {attempt}/{GUILD_RANKING_OPEN_ATTEMPTS}）")
-            page.wait_for_timeout(800)
-            continue
-
-        try:
-            print(
-                f"Guild Ranking をクリックします（試行 {attempt}/{GUILD_RANKING_OPEN_ATTEMPTS}）"
-            )
-            item.click(timeout=3000)
-        except Exception as exc:
-            last_error = f"Guild Ranking クリックに失敗: {exc}"
-            print(f"⚠ {last_error}（試行 {attempt}/{GUILD_RANKING_OPEN_ATTEMPTS}）")
-            page.wait_for_timeout(800)
-            continue
-
-        # クリック後、Guild Ranking ヘッダーが出るかを確認。
-        # 出なければ別ページを誤って開いたとみなし、メニューを開き直して再試行。
-        confirm_start = time.monotonic()
-        while time.monotonic() - confirm_start < GUILD_RANKING_CONFIRM_SECONDS:
-            if is_on_guild_ranking_page_strict(page):
-                # ヘッダー確認後、検索欄が使える状態になるまで少し待つ。
-                ready_start = time.monotonic()
-                while time.monotonic() - ready_start < RESULT_TIMEOUT_SECONDS:
-                    if is_on_guild_ranking_page(page):
-                        return
-                    time.sleep(POLL_INTERVAL_SECONDS)
-                return
-            time.sleep(POLL_INTERVAL_SECONDS)
-
-        last_error = "クリック後に Guild Ranking 画面を確認できませんでした（別ページを開いた可能性）。"
-        print(f"⚠ {last_error} 再試行します（試行 {attempt}/{GUILD_RANKING_OPEN_ATTEMPTS}）")
-
-    DATA_DIR.mkdir(parents=True, exist_ok=True)
-    page.screenshot(path=str(DATA_DIR / "debug_guild_ranking_menu.png"), full_page=True)
-    body_text = page.locator("body").inner_text()
-    (DATA_DIR / "debug_guild_ranking_menu_text.txt").write_text(
-        body_text, encoding="utf-8"
-    )
-    print("左メニュー内テキスト候補（先頭100行）:")
-    for line in [ln.strip() for ln in body_text.splitlines() if ln.strip()][:100]:
-        print(f"  - {line}")
-    raise RuntimeError(
-        f"左メニューの Guild Ranking を開けませんでした（{GUILD_RANKING_OPEN_ATTEMPTS}回試行）: {last_error}"
-    )
-
-
-def search_guild_in_ranking(page: Page, guild_name: str) -> None:
-    search_input = get_guild_ranking_search_input(page)
-    search_input.click()
-    search_input.fill("")
-    search_input.fill(guild_name)
-    page.wait_for_timeout(700)
-
-
-def get_ranking_row_candidates(page: Page) -> List[tuple[Locator, str]]:
-    rows = page.locator("table tbody tr, [role='row']")
-    result: List[tuple[Locator, str]] = []
-    for i in range(rows.count()):
-        row = rows.nth(i)
-        try:
-            if not row.is_visible():
-                continue
-            text = re.sub(r"\s+", " ", row.inner_text().strip())
-            if text:
-                result.append((row, text))
-        except Exception:
-            continue
-    return result
-
-
-def get_visible_ranking_pages(page: Page) -> List[int]:
-    pager = page.locator("a, button, span, li, [role='button'], [role='link']")
-    pages = set()
-    for i in range(pager.count()):
-        item = pager.nth(i)
-        try:
-            if not item.is_visible():
-                continue
-            text = item.inner_text().strip()
-            if text.isdigit():
-                n = int(text)
-                if 1 <= n <= 200:
-                    pages.add(n)
-        except Exception:
-            continue
-    return sorted(pages)
-
-
-def click_ranking_page(page: Page, page_no: int) -> bool:
-    before_rows = [text for _, text in get_ranking_row_candidates(page)[:8]]
-    selectors = [
-        page.get_by_role("link", name=str(page_no)),
-        page.get_by_role("button", name=str(page_no)),
-        page.locator(f"[aria-label*='page {page_no}' i]"),
-        page.locator(f"[aria-label*='go to page {page_no}' i]"),
-        page.locator(":is(a,button,span,li,div,[role='button'],[role='link'])").filter(
-            has_text=re.compile(rf"^\s*{page_no}\s*$")
-        ),
-    ]
-    for s in selectors:
-        try:
-            limit = min(s.count(), 20)
-            for i in range(limit):
-                el = s.nth(i)
-                if not el.is_visible():
-                    continue
-                clicked = False
-                try:
-                    el.click(timeout=2500)
-                    clicked = True
-                except Exception:
-                    try:
-                        el.evaluate("e => e.click()")
-                        clicked = True
-                    except Exception:
-                        clicked = False
-                if not clicked:
-                    continue
-                page.wait_for_timeout(1000)
-                after_rows = [text for _, text in get_ranking_row_candidates(page)[:8]]
-                if after_rows and after_rows != before_rows:
-                    return True
-                if after_rows:
-                    return True
-        except Exception:
-            continue
-
-    print(f"ページ {page_no} のボタン探索に失敗。数字候補一覧:")
-    visible_pages = get_visible_ranking_pages(page)
-    if visible_pages:
-        for candidate_page in visible_pages:
-            print(f"  - {candidate_page}")
-        return False
-
-    candidates = page.locator(
-        ":is(a,button,span,li,div,[role='button'],[role='link'])"
-    )
-    seen = set()
-    for i in range(min(candidates.count(), 120)):
-        try:
-            el = candidates.nth(i)
-            if not el.is_visible():
-                continue
-            text = el.inner_text().strip()
-            if text and re.fullmatch(r"\d+", text):
-                if text not in seen:
-                    seen.add(text)
-                    print(f"  - {text}")
-        except Exception:
-            continue
-    return False
-
-
-def find_exact_row_on_current_page(page: Page, guild_name: str) -> Locator | None:
-    exact_row: Locator | None = None
-    fold_row: Locator | None = None
-    for row, row_text in get_ranking_row_candidates(page):
-        parsed = parse_ranking_row(row_text)
-        if not parsed:
-            continue
-        rank, name = parsed
-        if DEBUG_ROW_LOG:
-            print(f"row parsed: rank={rank}, name={name}")
-        if name == guild_name:
-            exact_row = row
-            break
-        if fold_row is None and name.casefold() == guild_name.casefold():
-            fold_row = row
-    return exact_row if exact_row is not None else fold_row
-
-
-def parse_ranking_row(row_text: str) -> tuple[str, str] | None:
-    compact = re.sub(r"\s+", " ", row_text).strip()
-    m = re.match(r"^(?P<rank>\d+)\s+(?P<name>.+?)\s+(?P<acp>\d[\d,]*)\s+", compact)
-    if not m:
-        return None
-    return m.group("rank"), m.group("name").strip()
-
-
-def wait_for_guild_detail_transition(page: Page, guild_name: str) -> bool:
-    start = time.monotonic()
-    next_log = start + 5
-    transition_started = False
-    while time.monotonic() - start < DETAIL_TRANSITION_TIMEOUT_SECONDS:
-        # 判定はブラウザ内で行い、必要なフラグだけ受け取る（全文転送を避ける）。
-        state = page.evaluate(
-            """(guildName) => {
-                const body = document.body.innerText;
-                return {
-                    detail: body.includes('Guild Combat Power')
-                        || body.includes('Combat Power')
-                        || body.includes('Server Origin')
-                        || body.includes('Active Guild Members'),
-                    guildRank: body.includes('Guild Rank'),
-                    guildName: body.includes(guildName),
-                    loading: body.includes('Loading Data'),
-                };
+    return bool(
+        page.evaluate(
+            """(sel) => {
+                const el = document.querySelector(sel);
+                if (!el) return false;
+                el.click();
+                return true;
             }""",
-            guild_name,
+            selector,
         )
-        if state["detail"]:
-            return True
-        if (not state["guildRank"]) and state["guildName"]:
-            return True
-        # 「Loading Data」表示やランキング画面からの離脱は、クリックが効いて
-        # 詳細ページへの切り替えが始まった証拠。ここからはロードが30秒以上
-        # かかっても DETAIL_TRANSITION_TIMEOUT_SECONDS まで粘って待つ。
-        if state["loading"] or not state["guildRank"]:
-            transition_started = True
-        # 切り替わりの兆候が全く無いまま猶予を過ぎた場合は誤クリックとみなし、
-        # 早めに諦めて次の候補へ回す（失敗時に各候補で長時間待つのを防ぐ）。
-        if not transition_started and time.monotonic() - start >= DETAIL_CLICK_GRACE_SECONDS:
-            return False
-        if transition_started and time.monotonic() >= next_log:
-            elapsed = int(time.monotonic() - start)
-            print(f"ギルド詳細画面の読み込みを待機中... ({elapsed}秒経過)")
-            next_log += 5
-        time.sleep(POLL_INTERVAL_SECONDS)
-    return False
+    )
 
 
-def click_row_and_wait_for_detail(page: Page, row: Locator, guild_name: str) -> bool:
-    name_cell = row.locator("td, [role='cell']").nth(1)
-    arrow_selectors = [
-        "button",
-        "[role='button']",
-        "a",
-        "svg",
-        "i",
-        ":is(button,a,span,div,i,svg):has-text('arrow_forward')",
-        ":is(button,a,span,div,i,svg):has-text('chevron_right')",
-        ":is(button,a,span,div,i,svg):has-text('keyboard_arrow_right')",
-        "[aria-label*='detail' i]",
-        "[aria-label*='view' i]",
-        "[title*='detail' i]",
-        "[title*='view' i]",
-    ]
-    arrow_candidates = []
-    for selector in arrow_selectors:
-        candidates = row.locator(selector)
+def open_search_page(page: Page) -> None:
+    """左メニューの Search（li#searchg）を開き、検索欄が使えるまで待つ。"""
+    if not js_click(page, SEARCH_MENU_ITEM):
+        raise RuntimeError(f"左メニューの Search（{SEARCH_MENU_ITEM}）が見つかりません。")
+    try:
+        page.wait_for_function(
+            """(sel) => {
+                const el = document.querySelector(sel);
+                if (!el) return false;
+                const r = el.getBoundingClientRect();
+                return r.width > 0 && r.height > 0;
+            }""",
+            arg=SEARCH_FORM_INPUT,
+            timeout=SEARCH_PAGE_READY_TIMEOUT_MS,
+        )
+    except Exception as exc:
+        raise RuntimeError(f"Name Search 画面を開けませんでした: {exc}") from exc
+
+
+def run_name_search(page: Page, guild_name: str) -> None:
+    """ギルド名で Name Search を実行し、結果が描画されるまで待つ。"""
+    # 前回の結果が残ったままだと待機条件が即座に成立し、前のギルドの候補を
+    # 掴んでしまう。検索前に必ず結果欄を空にする。
+    page.evaluate(
+        """(sel) => {
+            const c = document.querySelector(sel);
+            if (c) c.innerHTML = '';
+        }""",
+        SEARCH_RESULT_CONTAINER,
+    )
+    box = page.locator(SEARCH_FORM_INPUT)
+    box.click()
+    box.fill(guild_name)
+    if not js_click(page, SEARCH_FORM_SUBMIT):
+        raise RuntimeError(f"検索ボタン（{SEARCH_FORM_SUBMIT}）が見つかりません。")
+
+    start = time.monotonic()
+    try:
+        page.wait_for_function(
+            """(sel) => {
+                const c = document.querySelector(sel);
+                if (!c) return false;
+                const t = c.innerText || '';
+                return t.includes('Guild Results:')
+                    || t.includes('Player Results:')
+                    || t.toLowerCase().includes('not found');
+            }""",
+            arg=SEARCH_RESULT_CONTAINER,
+            timeout=SEARCH_RESULT_TIMEOUT_MS,
+        )
+    except Exception as exc:
+        raise RuntimeError(
+            f"'{guild_name}' の検索結果が{SEARCH_RESULT_TIMEOUT_MS // 1000}秒以内に返りませんでした。"
+        ) from exc
+    print(f"  検索結果を取得（{time.monotonic() - start:.1f}秒）")
+
+
+def find_exact_guild_result(page: Page, guild_name: str) -> Locator | None:
+    """Guild Results の中から完全一致のギルド名だけを返す。
+
+    'TRAITORs' の検索で 'TRAITORsJP' も返るなど部分一致が混ざるため、
+    完全一致（次点で大文字小文字を無視した一致）以外はクリックしない。
+    """
+    spans = page.locator(SEARCH_RESULT_GUILD_SPANS)
+    try:
+        count = spans.count()
+    except Exception:
+        return None
+
+    names: List[str] = []
+    fallback: Locator | None = None
+    for i in range(count):
+        span = spans.nth(i)
         try:
-            count = min(candidates.count(), 30)
+            name = span.inner_text().strip()
         except Exception:
             continue
-        for i in range(count):
-            candidate = candidates.nth(i)
-            try:
-                box = candidate.bounding_box(timeout=1000)
-                if not box:
-                    continue
-                info = candidate.evaluate(
-                    """el => ({
-                        tagName: el.tagName || '',
-                        innerText: (el.innerText || el.textContent || '').trim(),
-                        ariaLabel: el.getAttribute('aria-label') || '',
-                        title: el.getAttribute('title') || ''
-                    })"""
-                )
-                arrow_candidates.append((box.get("x", 0), selector, i, candidate, info, box))
-            except Exception:
-                continue
+        names.append(name)
+        if name == guild_name:
+            print(f"  完全一致: {name}")
+            return span
+        if fallback is None and name.casefold() == guild_name.casefold():
+            fallback = span
 
-    arrow_candidates.sort(key=lambda item: item[0], reverse=True)
-    arrow_failed = False
-    for _, selector, index, candidate, info, box in arrow_candidates:
-        try:
-            print(
-                "detail arrow candidate click: "
-                f"selector={selector}, index={index}, "
-                f"tagName={info.get('tagName', '')}, "
-                f"innerText={info.get('innerText', '')}, "
-                f"aria-label={info.get('ariaLabel', '')}, "
-                f"title={info.get('title', '')}, "
-                f"bounding_box={box}"
-            )
-            candidate.click(timeout=2500)
-            if wait_for_guild_detail_transition(page, guild_name):
-                print("Guild detail opened by row arrow candidate.")
-                return True
-            arrow_failed = True
-            print("Arrow candidate did not open guild detail. Trying next candidate.")
-        except Exception as exc:
-            arrow_failed = True
-            print(f"Arrow candidate click failed: selector={selector}, index={index}, error={exc}")
-
-    if arrow_failed or arrow_candidates:
-        try:
-            print(f"target ranking row inner_text: {row.inner_text(timeout=1000)}")
-        except Exception as exc:
-            print(f"target ranking row inner_text unavailable: {exc}")
-        print("detail arrow candidates:")
-        for _, selector, index, _, info, box in arrow_candidates:
-            print(
-                "  - "
-                f"selector={selector}, index={index}, "
-                f"tagName={info.get('tagName', '')}, "
-                f"innerText={info.get('innerText', '')}, "
-                f"aria-label={info.get('ariaLabel', '')}, "
-                f"title={info.get('title', '')}, "
-                f"bounding_box={box}"
-            )
-    attempts = [
-        ("Guild Nameセルを click", lambda: name_cell.click(timeout=2500)),
-        ("Guild Nameセルを dblclick", lambda: name_cell.dblclick(timeout=2500)),
-        ("行全体を click", lambda: row.click(timeout=2500)),
-        ("行全体を dblclick", lambda: row.dblclick(timeout=2500)),
-        ("JS click", lambda: row.evaluate("el => el.click()")),
-    ]
-    for label, fn in attempts:
-        try:
-            print(f"{label} しました")
-            fn()
-            if wait_for_guild_detail_transition(page, guild_name):
-                print("Guild Combat Power / Active Guild Members を確認しました")
-                return True
-            print("詳細ページへ遷移しなかったため次の方法を試します")
-        except Exception:
-            continue
-    return False
+    if fallback is not None:
+        print(f"  大文字小文字を無視して一致: {guild_name}")
+        return fallback
+    print(f"  完全一致なし。候補: {names if names else '（Guild Results なし）'}")
+    return None
 
 
-def click_exact_guild_from_ranking(page: Page, guild_name: str) -> None:
-    search_pages = [1, 2, 3, 4]
-    page_range_label = f"1〜{search_pages[-1]}"
-    checked_rows: List[str] = []
-    for page_no in search_pages:
-        print(f"Guild Ranking {page_no}ページ目を検索中...")
-        if page_no != 1:
-            if not click_ranking_page(page, page_no):
-                print(f"  - {page_no}ページ目ボタンが見つからないためスキップ")
-                continue
-            page.wait_for_timeout(800)
+def open_guild_detail(page: Page, span: Locator, guild_name: str) -> None:
+    """検索結果のギルド名をクリックし、詳細画面が出るまで待つ。"""
+    start = time.monotonic()
+    span.evaluate("el => el.click()")
+    try:
+        page.wait_for_function(DETAIL_READY_JS, timeout=DETAIL_LOAD_TIMEOUT_MS)
+    except Exception as exc:
+        raise RuntimeError(
+            f"'{guild_name}' の詳細画面が{DETAIL_LOAD_TIMEOUT_MS // 1000}秒以内に開きませんでした。"
+        ) from exc
+    print(f"  詳細画面を表示（{time.monotonic() - start:.1f}秒）")
 
-        rows = get_ranking_row_candidates(page)
-        checked_rows.extend([text for _, text in rows[:30]])
-        target_row = find_exact_row_on_current_page(page, guild_name)
-        if target_row is not None:
-            print(f"matched guild: {guild_name}")
-            if click_row_and_wait_for_detail(page, target_row, guild_name):
-                return
 
-    print(f"Guild Ranking 候補行（{page_range_label}ページ確認分）:")
-    for text in checked_rows:
-        print(f"  - {text}")
-    DATA_DIR.mkdir(parents=True, exist_ok=True)
-    page.screenshot(path=str(DATA_DIR / "debug_after_search.png"), full_page=True)
-    (DATA_DIR / "debug_after_search_text.txt").write_text(
-        page.locator("body").inner_text(), encoding="utf-8"
-    )
-    raise RuntimeError(
-        f"Guild Ranking {page_range_label}ページで '{guild_name}' 完全一致行をクリックできませんでした。"
-    )
+def dump_search_debug(page: Page, guild_name: str) -> None:
+    """完全一致が見つからなかったときの調査用ダンプ。"""
+    try:
+        DATA_DIR.mkdir(parents=True, exist_ok=True)
+        stem = f"debug_search_{sanitize_filename(guild_name)}"
+        page.screenshot(path=str(DATA_DIR / f"{stem}.png"), full_page=True)
+        (DATA_DIR / f"{stem}.txt").write_text(
+            page.locator("body").inner_text(), encoding="utf-8"
+        )
+    except Exception:
+        pass
 
 
 def get_scroll_metrics(page: Page) -> tuple[int, int]:
@@ -1297,40 +927,18 @@ def save_members_to_csv(guild_name: str, members: List[MemberRow]) -> Path:
     return file_path
 
 
-def return_to_guild_ranking(page: Page) -> None:
-    back_candidates = [
-        page.locator("button:has-text('arrow_back')"),
-        page.locator("[aria-label*='back' i]"),
-        page.locator("button i:has-text('arrow_back')").locator("xpath=ancestor::button[1]"),
-    ]
-    for c in back_candidates:
-        try:
-            if c.count() > 0 and c.first.is_visible():
-                c.first.click(timeout=2000)
-                page.wait_for_timeout(500)
-                break
-        except Exception:
-            continue
-    try:
-        open_guild_ranking_page(page)
-    except Exception:
-        pass
-    start = time.monotonic()
-    while time.monotonic() - start < RESULT_TIMEOUT_SECONDS:
-        try:
-            if get_guild_ranking_search_input(page).is_visible():
-                return
-        except Exception:
-            pass
-        time.sleep(POLL_INTERVAL_SECONDS)
-    raise RuntimeError("Guild Ranking 画面へ戻れませんでした。")
-
-
 def search_and_open_guild(page: Page, guild_name: str) -> None:
+    """Name Search でギルドを検索し、完全一致の 1 件だけを開く。"""
     close_general_chat_panel(page)
-    open_guild_ranking_page(page)
-    search_guild_in_ranking(page, guild_name)
-    click_exact_guild_from_ranking(page, guild_name)
+    open_search_page(page)
+    run_name_search(page, guild_name)
+    span = find_exact_guild_result(page, guild_name)
+    if span is None:
+        dump_search_debug(page, guild_name)
+        raise RuntimeError(
+            f"Name Search で '{guild_name}' に完全一致するギルドが見つかりませんでした。"
+        )
+    open_guild_detail(page, span, guild_name)
 
 
 def main() -> int:
@@ -1394,25 +1002,12 @@ def main() -> int:
                         f"✅ [{i}/{total}] 「{guild}」 取得成功（{len(members)}人） "
                         f"-> {workbook_path}"
                     )
-                    if i < total:
-                        return_to_guild_ranking(page)
                 except (PlaywrightTimeoutError, RuntimeError) as e:
                     failed.append((guild, str(e)))
                     print(f"❌ [{i}/{total}] 「{guild}」 取得失敗: {e}")
-                    # 失敗しても次のギルドへ進めるよう、ランキング画面へ戻しておく。
-                    if i < total:
-                        try:
-                            return_to_guild_ranking(page)
-                        except Exception as recover_exc:
-                            print(f"  ⚠ ランキング画面への復帰に失敗: {recover_exc}")
                 except Exception as e:
                     failed.append((guild, f"想定外エラー: {e}"))
                     print(f"❌ [{i}/{total}] 「{guild}」 想定外エラー: {e}")
-                    if i < total:
-                        try:
-                            return_to_guild_ranking(page)
-                        except Exception as recover_exc:
-                            print(f"  ⚠ ランキング画面への復帰に失敗: {recover_exc}")
 
             print("")
             print("========== 取得結果サマリー ==========")
