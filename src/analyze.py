@@ -21,10 +21,12 @@ from openpyxl.styles import Alignment, Font, PatternFill
 from openpyxl.utils import get_column_letter
 
 try:
-    from .paths import ANALYSIS_DIR, CONFIG_DIR, DATA_DIR, PROJECT_ROOT, ensure_dirs
+    from .paths import ANALYSIS_DIR, CONFIG_DIR, DATA_DIR, DB_PATH, PROJECT_ROOT, ensure_dirs
+    from . import db
     from . import session as session_state
 except ImportError:  # 直接実行された場合のため
-    from paths import ANALYSIS_DIR, CONFIG_DIR, DATA_DIR, PROJECT_ROOT, ensure_dirs  # type: ignore
+    from paths import ANALYSIS_DIR, CONFIG_DIR, DATA_DIR, DB_PATH, PROJECT_ROOT, ensure_dirs  # type: ignore
+    import db  # type: ignore
     import session as session_state  # type: ignore
 
 BASE_DIR = PROJECT_ROOT
@@ -540,12 +542,105 @@ def session_guild_dirs() -> list[Path] | None:
 
 
 def collect_metrics(settings: AnalysisSettings) -> tuple[list[dict[str, Any]], list[tuple[str, str]]]:
-    """Analyze guild directories under data/.
+    """Analyze guild snapshots from SQLite, the application's source of truth."""
 
-    When a collection session is active, only the guilds collected in that
-    session are analyzed, so the summary lists exactly what was just gathered.
-    Without a session the analyzer falls back to scanning every guild directory.
-    """
+    if not DB_PATH.exists():
+        logging.warning("SQLiteがないため従来のExcel分析へフォールバックします: %s", DB_PATH)
+        return collect_metrics_from_excel(settings)
+
+    conn = db.initialize(DB_PATH)
+    try:
+        active_session = session_state.load_session()
+        if active_session is None:
+            guild_names = [
+                row["guild_name"]
+                for row in conn.execute(
+                    "SELECT DISTINCT guild_name FROM guild_snapshots ORDER BY guild_name"
+                )
+            ]
+        else:
+            guild_names = sorted(session_state.session_guild_files(active_session))
+
+        metrics: list[dict[str, Any]] = []
+        failures: list[tuple[str, str]] = []
+        for guild_name in guild_names:
+            try:
+                latest_rows = conn.execute(
+                    """
+                    SELECT retrieved_at FROM guild_snapshots
+                    WHERE guild_name = ? ORDER BY retrieved_at DESC LIMIT 2
+                    """,
+                    (guild_name,),
+                ).fetchall()
+                if not latest_rows:
+                    raise ValueError("SQLiteにギルドスナップショットがありません")
+                latest_at = latest_rows[0]["retrieved_at"]
+                previous_at = latest_rows[1]["retrieved_at"] if len(latest_rows) > 1 else None
+                member_rows = conn.execute(
+                    """
+                    SELECT cpm FROM member_snapshots
+                    WHERE guild_name = ? AND retrieved_at = ? AND cpm IS NOT NULL
+                    """,
+                    (guild_name, latest_at),
+                ).fetchall()
+                cpms = [float(row["cpm"]) for row in member_rows]
+                summary_row = conn.execute(
+                    """
+                    SELECT * FROM guild_summary_snapshots
+                    WHERE guild_name = ? AND retrieved_at = ? LIMIT 1
+                    """,
+                    (guild_name, latest_at),
+                ).fetchone()
+                summary = dict(summary_row) if summary_row else {}
+                row: dict[str, Any] = {
+                    "guild_name": guild_name,
+                    "source_file": "SQLite",
+                    "retrieved_at": latest_at,
+                    **calculate_cpm_metrics(cpms, settings),
+                }
+                for field in SUMMARY_FIELDS:
+                    row[field] = numeric_or_blank(summary.get(field))
+                for field in CPM_FORMAT_COLUMNS | COUNT_FORMAT_COLUMNS:
+                    if field in row:
+                        row[field] = round_numeric(row[field])
+                row["all_time_win_rate"] = normalize_rate(row.get("all_time_win_rate"))
+                row["node_win_rate"] = safe_rate(row.get("node_won"), row.get("total_node_wars"))
+                row["siege_win_rate"] = safe_rate(row.get("siege_won"), row.get("total_siege_wars"))
+                row["node_siege_total"] = (to_number(row.get("total_node_wars")) or 0) + (to_number(row.get("total_siege_wars")) or 0)
+                row["node_siege_win_total"] = (to_number(row.get("node_won")) or 0) + (to_number(row.get("siege_won")) or 0)
+                previous_cpms: list[float] = []
+                if previous_at:
+                    previous_cpms = [
+                        float(previous["cpm"])
+                        for previous in conn.execute(
+                            """
+                            SELECT cpm FROM member_snapshots
+                            WHERE guild_name = ? AND retrieved_at = ? AND cpm IS NOT NULL
+                            """,
+                            (guild_name, previous_at),
+                        )
+                    ]
+                previous_average = rounded_average(previous_cpms) if previous_at else ""
+                row["prev_avg_cpm"] = previous_average
+                if previous_average != "" and row["avg_cpm"] != "":
+                    row["avg_cpm_growth"] = round_numeric(row["avg_cpm"] - previous_average)
+                    row["avg_cpm_growth_rate"] = safe_rate(row["avg_cpm_growth"], previous_average)
+                else:
+                    row["avg_cpm_growth"] = ""
+                    row["avg_cpm_growth_rate"] = ""
+                metrics.append(row)
+            except Exception as exc:  # noqa: BLE001
+                failures.append((guild_name, str(exc)))
+                logging.exception("SQLite分析失敗: %s", guild_name)
+        return metrics, failures
+    finally:
+        conn.close()
+
+
+def collect_metrics_from_excel(
+    settings: AnalysisSettings,
+) -> tuple[list[dict[str, Any]], list[tuple[str, str]]]:
+    """Legacy fallback used only before the first SQLite migration/import."""
 
     if not DATA_DIR.exists():
         logging.warning("data フォルダが見つかりません: %s", DATA_DIR)

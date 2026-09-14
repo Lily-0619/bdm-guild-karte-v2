@@ -23,8 +23,10 @@ if TYPE_CHECKING:
 
 try:
     from .paths import ANALYSIS_DIR, DATA_DIR, DB_PATH, DETA_PV_DIR, PROJECT_ROOT, PV_TEMPLATE_PATH, ensure_dirs
+    from . import db
 except ImportError:  # 直接実行された場合のため
     from paths import ANALYSIS_DIR, DATA_DIR, DB_PATH, DETA_PV_DIR, PROJECT_ROOT, PV_TEMPLATE_PATH, ensure_dirs  # type: ignore
+    import db  # type: ignore
 
 INVALID_FILENAME_CHARS = r'\\/:*?"<>|'
 DATE_PATTERNS = (
@@ -45,9 +47,15 @@ class MemberRecord:
     cpm: float | int | None
     guild_name: str
     source_file: Path | None = None
+    person_id: int | None = None
+    fcp: float | int | None = None
+    level: int | None = None
+    class_name: str | None = None
 
     @property
     def identity_key(self) -> tuple[str, str]:
+        if self.person_id is not None:
+            return ("person_id", str(self.person_id))
         return (self.guild_name, self.family_name)
 
     @property
@@ -119,7 +127,7 @@ class PVTracker:
 
     def ensure_database(self) -> None:
         self.data_dir.mkdir(parents=True, exist_ok=True)
-        with sqlite3.connect(self.db_path) as conn:
+        with db.initialize(self.db_path) as conn:
             conn.execute(
                 """
                 CREATE TABLE IF NOT EXISTS pv_identity_links (
@@ -134,7 +142,8 @@ class PVTracker:
                     new_pv_file TEXT,
                     link_type TEXT,
                     linked_at TEXT,
-                    note TEXT
+                    note TEXT,
+                    person_id INTEGER REFERENCES persons(id)
                 )
                 """
             )
@@ -152,6 +161,9 @@ class PVTracker:
                 )
                 """
             )
+            columns = {row["name"] for row in conn.execute("PRAGMA table_info(pv_identity_links)")}
+            if "person_id" not in columns:
+                conn.execute("ALTER TABLE pv_identity_links ADD COLUMN person_id INTEGER")
 
     def storage_path(self, path: Path | None) -> str:
         if path is None:
@@ -163,6 +175,14 @@ class PVTracker:
 
     def list_summary_dates(self) -> list[str]:
         """Return selectable dates discovered from analysis/summary_*.xlsx."""
+        if self.db_path.exists():
+            with db.initialize(self.db_path) as conn:
+                dates = {
+                    normalize_date(row["retrieved_at"])
+                    for row in conn.execute("SELECT DISTINCT retrieved_at FROM member_snapshots")
+                }
+            if any(dates):
+                return sorted(date for date in dates if date)
         if not self.analysis_dir.exists():
             return []
         dates = {
@@ -172,6 +192,16 @@ class PVTracker:
         return sorted(date for date in dates if date)
 
     def list_guild_names(self) -> list[str]:
+        if self.db_path.exists():
+            with db.initialize(self.db_path) as conn:
+                names = [
+                    row["guild_name"]
+                    for row in conn.execute(
+                        "SELECT DISTINCT guild_name FROM member_snapshots ORDER BY guild_name"
+                    )
+                ]
+            if names:
+                return names
         if not self.data_dir.exists():
             return []
         return sorted(path.name for path in self.data_dir.iterdir() if path.is_dir())
@@ -231,6 +261,34 @@ class PVTracker:
 
     def load_members_for_date(self, date_value: str) -> list[MemberRecord]:
         target_date = normalize_date(date_value)
+        if self.db_path.exists() and target_date:
+            sql_date = f"{target_date[:4]}-{target_date[4:6]}-{target_date[6:8]}"
+            with db.initialize(self.db_path) as conn:
+                rows = conn.execute(
+                    """
+                    SELECT person_id, retrieved_at, family_name, guild_name,
+                           cpm, fcp, level,
+                           COALESCE(class_name_normalized, class_name, class_name_raw) AS class_name
+                    FROM member_snapshots
+                    WHERE substr(retrieved_at, 1, 10) = ?
+                    ORDER BY guild_name, rank_no, family_name
+                    """,
+                    (sql_date,),
+                ).fetchall()
+            if rows:
+                return [
+                    MemberRecord(
+                        date=target_date,
+                        family_name=row["family_name"],
+                        cpm=row["cpm"],
+                        guild_name=row["guild_name"],
+                        person_id=row["person_id"],
+                        fcp=row["fcp"],
+                        level=row["level"],
+                        class_name=row["class_name"],
+                    )
+                    for row in rows
+                ]
         summary_path = self.summary_path_for_date(target_date)
         if summary_path is not None:
             records = self.load_members_from_summary(summary_path, target_date)
@@ -339,7 +397,11 @@ class PVTracker:
             new_family_records = new_by_family.get(family_name, [])
             for old_record in old_family_records:
                 for new_record in new_family_records:
-                    if old_record.guild_name != new_record.guild_name:
+                    if (
+                        old_record.identity_key in unmatched_old_keys
+                        and new_record.identity_key in unmatched_new_keys
+                        and old_record.guild_name != new_record.guild_name
+                    ):
                         result.transfer_candidates.append(ManualCandidate(old_record, new_record, "guild_transfer"))
                         consumed_old.add(old_record.identity_key)
                         consumed_new.add(new_record.identity_key)
@@ -441,6 +503,16 @@ class PVTracker:
         link_type: str = "manual",
         note: str = "",
     ) -> LinkResult:
+        with db.initialize(self.db_path) as conn:
+            old_person_id = old_record.person_id or db.resolve_person_id(
+                conn, family_name=old_record.family_name, guild_name=old_record.guild_name
+            )
+            new_person_id = new_record.person_id or db.resolve_person_id(
+                conn, family_name=new_record.family_name, guild_name=new_record.guild_name
+            )
+            person_id = db.merge_persons(
+                conn, keep_person_id=old_person_id, merge_person_id=new_person_id
+            )
         old_file = self.find_pv_file(old_record) or self.create_person_workbook(old_record, include_initial_row=True)
         self.append_record(old_file, new_record)
         new_file = self.rename_pv_file(old_file, new_record.guild_name, new_record.family_name)
@@ -449,7 +521,7 @@ class PVTracker:
                 link_type = "name_change"
             elif old_record.guild_name != new_record.guild_name:
                 link_type = "guild_transfer"
-        self.save_identity_link(old_record, new_record, old_file, new_file, link_type, note)
+        self.save_identity_link(old_record, new_record, old_file, new_file, link_type, note, person_id)
         return LinkResult(old_file=old_file, new_file=new_file, appended=True, link_type=link_type)
 
     def save_identity_link(
@@ -460,6 +532,7 @@ class PVTracker:
         new_file: Path,
         link_type: str,
         note: str = "",
+        person_id: int | None = None,
     ) -> None:
         self.ensure_database()
         with sqlite3.connect(self.db_path) as conn:
@@ -468,8 +541,8 @@ class PVTracker:
                 INSERT INTO pv_identity_links (
                     old_date, new_date, old_family_name, old_guild_name,
                     new_family_name, new_guild_name, old_pv_file, new_pv_file,
-                    link_type, linked_at, note
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    link_type, linked_at, note, person_id
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     old_record.date,
@@ -483,6 +556,7 @@ class PVTracker:
                     link_type,
                     datetime.now().isoformat(timespec="seconds"),
                     note,
+                    person_id,
                 ),
             )
 
@@ -667,7 +741,8 @@ def build_family_index(records: Iterable[MemberRecord]) -> dict[str, list[Member
 def unique_records(records: Iterable[MemberRecord]) -> list[MemberRecord]:
     unique: dict[tuple[str, str, str], MemberRecord] = {}
     for record in records:
-        unique.setdefault((record.date, record.guild_name, record.family_name), record)
+        identity = str(record.person_id) if record.person_id is not None else f"{record.guild_name}:{record.family_name}"
+        unique.setdefault((record.date, identity, record.family_name), record)
     return list(unique.values())
 
 
@@ -688,7 +763,7 @@ def ensure_sheets(workbook: "Workbook") -> None:
     if "グラフ" not in workbook.sheetnames:
         workbook.create_sheet("グラフ")
     data_sheet = workbook["データ"]
-    headers = ["日付", "CPM", "伸び", "家門名", "所属", "状態"]
+    headers = ["日付", "CPM", "伸び", "家門名", "所属", "状態", "FCP", "レベル", "職業", "person_id"]
     for column, header in enumerate(headers, start=1):
         if data_sheet.cell(row=1, column=column).value in (None, ""):
             data_sheet.cell(row=1, column=column, value=header)
@@ -714,7 +789,20 @@ def append_record_to_workbook(
     growth = None
     if calculate_growth and previous_cpm is not None and record.cpm is not None:
         growth = record.cpm - previous_cpm
-    data_sheet.append([record.date, record.cpm, growth, record.family_name, record.guild_name, status])
+    data_sheet.append(
+        [
+            record.date,
+            record.cpm,
+            growth,
+            record.family_name,
+            record.guild_name,
+            status,
+            record.fcp,
+            record.level,
+            record.class_name,
+            record.person_id,
+        ]
+    )
     return True
 
 
