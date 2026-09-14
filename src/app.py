@@ -239,17 +239,14 @@ class LauncherWindow(QMainWindow):
         self.statusBar().showMessage("新しい収集を開始できます。")
 
     def launch_pv_detail_app(self) -> None:
-        started = QProcess.startDetached(
-            sys.executable,
-            ["-m", "src.pv_detail_app"],
-            str(PROJECT_ROOT),
-        )
-        if started:
-            self.append_log(f"[START] 個人カルテへ: {sys.executable} -m src.pv_detail_app")
-            self.statusBar().showMessage("詳細分析システムを別ウィンドウで起動しました。")
-        else:
-            self.append_log("[ERROR] 詳細分析システムを起動できませんでした。")
-            QMessageBox.warning(self, "起動エラー", "詳細分析システムを起動できませんでした。")
+        try:
+            from .person_data_view import PersonDataDialog
+        except ImportError:  # 直接実行された場合のため
+            from person_data_view import PersonDataDialog  # type: ignore
+        self.person_data_dialog = PersonDataDialog(self)
+        self.person_data_dialog.show()
+        self.append_log("[OPEN] SQLiteの個人データ画面を開きました。")
+        self.statusBar().showMessage("個人データをSQLiteから表示しています。")
 
     def _make_card(self, object_name: str) -> QFrame:
         card = QFrame()

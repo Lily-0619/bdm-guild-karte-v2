@@ -43,6 +43,24 @@ def create_tables(conn: sqlite3.Connection) -> None:
 
     conn.executescript(
         """
+        CREATE TABLE IF NOT EXISTS persons (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            canonical_family_name TEXT NOT NULL,
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+        );
+
+        CREATE TABLE IF NOT EXISTS person_aliases (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            person_id INTEGER NOT NULL REFERENCES persons(id) ON DELETE CASCADE,
+            family_name TEXT NOT NULL,
+            guild_name TEXT NOT NULL,
+            valid_from TEXT,
+            valid_to TEXT,
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(family_name, guild_name)
+        );
+
         CREATE TABLE IF NOT EXISTS guild_snapshots (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             retrieved_at TEXT NOT NULL,
@@ -122,11 +140,23 @@ def create_tables(conn: sqlite3.Connection) -> None:
         conn,
         "member_snapshots",
         {
+            "person_id": "INTEGER REFERENCES persons(id)",
             "class_name_raw": "TEXT",
             "class_name_normalized": "TEXT",
             "class_name_version": "TEXT",
         },
     )
+    conn.executescript(
+        """
+        CREATE INDEX IF NOT EXISTS idx_member_snapshots_person_date
+            ON member_snapshots(person_id, retrieved_at);
+        CREATE INDEX IF NOT EXISTS idx_member_snapshots_guild_date
+            ON member_snapshots(guild_name, retrieved_at);
+        CREATE INDEX IF NOT EXISTS idx_person_aliases_person
+            ON person_aliases(person_id);
+        """
+    )
+    backfill_person_ids(conn)
     migrate_import_file_paths(conn)
     conn.commit()
 
@@ -179,20 +209,24 @@ def save_member_snapshot(
     class_name_raw: str | None = None,
     class_name_normalized: str | None = None,
     class_name_version: str | None = None,
+    person_id: int | None = None,
 ) -> None:
     """Upsert one member-level snapshot."""
 
+    if person_id is None:
+        person_id = resolve_person_id(conn, family_name=family_name, guild_name=guild_name)
     conn.execute(
         """
         INSERT INTO member_snapshots (
-            retrieved_at, guild_name, rank_no, class_name, family_name,
+            retrieved_at, guild_name, rank_no, class_name, family_name, person_id,
             level, cpm, fcp, class_name_raw, class_name_normalized,
             class_name_version, created_at
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(retrieved_at, guild_name, family_name) DO UPDATE SET
             rank_no = excluded.rank_no,
             class_name = excluded.class_name,
+            person_id = excluded.person_id,
             level = excluded.level,
             cpm = excluded.cpm,
             fcp = excluded.fcp,
@@ -206,6 +240,7 @@ def save_member_snapshot(
             rank_no,
             class_name,
             family_name,
+            person_id,
             level,
             cpm,
             fcp,
@@ -215,6 +250,118 @@ def save_member_snapshot(
             utc_now_iso(),
         ),
     )
+
+
+def resolve_person_id(
+    conn: sqlite3.Connection, *, family_name: str, guild_name: str
+) -> int:
+    """Return a stable person id for an exact family/guild identity.
+
+    Cross-guild matches are deliberately not merged automatically.  Transfers
+    and name changes must be confirmed by a user through ``merge_persons``.
+    """
+
+    family = _clean_text(family_name)
+    guild = _clean_text(guild_name)
+    if not family or not guild:
+        raise ValueError("family_name and guild_name are required")
+    row = conn.execute(
+        "SELECT person_id FROM person_aliases WHERE family_name = ? AND guild_name = ?",
+        (family, guild),
+    ).fetchone()
+    if row:
+        return int(row["person_id"])
+    cursor = conn.execute(
+        "INSERT INTO persons (canonical_family_name, created_at, updated_at) VALUES (?, ?, ?)",
+        (family, utc_now_iso(), utc_now_iso()),
+    )
+    person_id = int(cursor.lastrowid)
+    conn.execute(
+        """
+        INSERT INTO person_aliases (person_id, family_name, guild_name, created_at)
+        VALUES (?, ?, ?, ?)
+        """,
+        (person_id, family, guild, utc_now_iso()),
+    )
+    return person_id
+
+
+def merge_persons(
+    conn: sqlite3.Connection, *, keep_person_id: int, merge_person_id: int
+) -> int:
+    """Merge a confirmed duplicate into ``keep_person_id`` and return it."""
+
+    if keep_person_id == merge_person_id:
+        return keep_person_id
+    keep = conn.execute("SELECT id FROM persons WHERE id = ?", (keep_person_id,)).fetchone()
+    merged = conn.execute("SELECT id FROM persons WHERE id = ?", (merge_person_id,)).fetchone()
+    if not keep or not merged:
+        raise ValueError("person id not found")
+    with conn:
+        conn.execute(
+            "UPDATE member_snapshots SET person_id = ? WHERE person_id = ?",
+            (keep_person_id, merge_person_id),
+        )
+        conn.execute(
+            "UPDATE person_aliases SET person_id = ? WHERE person_id = ?",
+            (keep_person_id, merge_person_id),
+        )
+        if _table_exists(conn, "pv_identity_links"):
+            _ensure_columns(conn, "pv_identity_links", {"person_id": "INTEGER"})
+            conn.execute(
+                "UPDATE pv_identity_links SET person_id = ? WHERE person_id = ?",
+                (keep_person_id, merge_person_id),
+            )
+        conn.execute("DELETE FROM persons WHERE id = ?", (merge_person_id,))
+        conn.execute(
+            "UPDATE persons SET updated_at = ? WHERE id = ?",
+            (utc_now_iso(), keep_person_id),
+        )
+    return keep_person_id
+
+
+def backfill_person_ids(conn: sqlite3.Connection) -> int:
+    """Assign conservative person ids to snapshots created by older versions."""
+
+    if not _table_exists(conn, "member_snapshots"):
+        return 0
+    rows = conn.execute(
+        """
+        SELECT DISTINCT family_name, guild_name
+        FROM member_snapshots
+        WHERE person_id IS NULL AND family_name <> '' AND guild_name <> ''
+        """
+    ).fetchall()
+    updated = 0
+    for row in rows:
+        person_id = resolve_person_id(
+            conn, family_name=row["family_name"], guild_name=row["guild_name"]
+        )
+        cursor = conn.execute(
+            """
+            UPDATE member_snapshots SET person_id = ?
+            WHERE person_id IS NULL AND family_name = ? AND guild_name = ?
+            """,
+            (person_id, row["family_name"], row["guild_name"]),
+        )
+        updated += cursor.rowcount
+    return updated
+
+
+def person_history(conn: sqlite3.Connection, person_id: int) -> list[sqlite3.Row]:
+    """Return the complete CP/FCP/class/level/guild history for one person."""
+
+    return conn.execute(
+        """
+        SELECT person_id, retrieved_at, family_name, guild_name, rank_no,
+               level, cpm, fcp, class_name, class_name_raw,
+               class_name_normalized, class_name_version
+        FROM member_snapshots
+        WHERE person_id = ?
+        ORDER BY retrieved_at, id
+        """,
+        (person_id,),
+    ).fetchall()
 
 
 def save_member_snapshots(
